@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         editText = findViewById(R.id.edit_text);
-
+        editText.setHint("NOW WEre COOOK");
         setSupportActionBar(toolbar);
 
         //pucko added here

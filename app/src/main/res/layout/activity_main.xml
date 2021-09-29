@@ -30,5 +30,14 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@android:drawable/ic_dialog_email"/>
+    <EditText android:id="@+id/edit_text"
+              android:layout_width="match_parent"
+              android:layout_height="119dp"
+              android:layout_marginRight="15dp"
+              android:layout_marginLeft="15dp"
+              android:layout_marginTop="60dp"
+              android:hint="Tap to Speak"
+              android:padding="10dp"
+              android:layout_centerInParent="true" tools:ignore="MissingConstraints"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

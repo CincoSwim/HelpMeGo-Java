@@ -7,15 +7,7 @@
         android:layout_height="match_parent"
         tools:context=".FirstFragment">
 
-    <EditText android:id="@+id/edit_text"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
 
-              android:layout_marginRight="15dp"
-              android:layout_marginLeft="15dp"
-              android:hint="Tap to Speak"
-              android:padding="10dp"
-              android:layout_centerInParent = "true" tools:ignore="MissingConstraints"/>
 
 
 
