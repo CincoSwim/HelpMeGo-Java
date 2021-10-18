@@ -83,6 +83,12 @@ public class MainActivity extends AppCompatActivity {
             public void onResults(Bundle results) {
                     ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                     editText.setText(data.get(0));
+                    String testStr = data.get(0);
+
+                    int roomindex = testStr.indexOf("room") + 5;
+                    testStr += "(parsed room num: " + roomindex + ")";
+
+                    editText.setText(testStr);
             }
 
             @Override
