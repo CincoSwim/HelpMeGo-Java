@@ -8,7 +8,7 @@ import java.util.LinkedList;
 public class PathGraph {
 
 
-    private static void findShortestPath(
+    public static LinkedList<Integer> findShortestPath(
             ArrayList<ArrayList<Integer>> adj, int start,
             int dest, int vertexes){
         int pred[] = new int[vertexes];
@@ -17,6 +17,7 @@ public class PathGraph {
         if (BreadthSearch(adj, start, dest, vertexes, pred, dist) == false){
             //give a popup or direct the user to find a beacon, they gone wack
             //this gives us the path though.
+            //return a null linked list to show it gone poopy
         }
         LinkedList<Integer> path = new LinkedList<Integer>();
         int crawl = dest;
@@ -25,6 +26,7 @@ public class PathGraph {
             path.add(pred[crawl]);
             crawl = pred[crawl];
         }
+        return path;
 
 
     }
