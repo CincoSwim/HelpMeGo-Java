@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         editText = findViewById(R.id.edit_text);
-        editText.setHint("NOW WEre COOOK");
+        editText.setHint("Please input a destination.");
         setSupportActionBar(toolbar);
 
         //pucko added here
@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
             public void onBeginningOfSpeech() {
                 editText.setText("");
                 editText.setHint("Listening...");
+                Log.d(TAG, "Listening to input on button press");
             }
 
             @Override
@@ -85,10 +86,16 @@ public class MainActivity extends AppCompatActivity {
                     editText.setText(data.get(0));
                     String testStr = data.get(0);
 
-                    int roomindex = testStr.indexOf("room") + 5;
-                    testStr += "(parsed room num: " + roomindex + ")";
+                    //int roomindex = testStr.indexOf("room") + 5;
+                    testStr += "(parsed room num: " + testStr.substring(testStr.lastIndexOf("room")) + ")";
 
                     editText.setText(testStr);
+
+                    /* Begin finding path*/
+                    //get closest BT Beacon identity
+                    //get appropriate destination beacon identity
+                    //Find path between the two
+                    //Move to next fragment for directing
             }
 
             @Override
