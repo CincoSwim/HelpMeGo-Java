@@ -22,7 +22,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main"/>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
@@ -39,5 +38,10 @@
               android:hint="Tap to Speak"
               android:padding="10dp"
               android:layout_centerInParent="true" tools:ignore="MissingConstraints"/>
+    <Button
+            android:text="BT List"
+            android:layout_width="99dp"
+            android:layout_height="34dp" android:id="@+id/BTButton" android:layout_gravity="bottom"
+            android:layout_margin="@dimen/fab_margin"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

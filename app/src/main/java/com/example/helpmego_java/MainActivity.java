@@ -9,6 +9,7 @@ import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.view.MotionEvent;
+import android.widget.Button;
 import android.widget.EditText;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -120,6 +121,15 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             */
 
+        });
+
+        // Added button to goto bluetooth device screen for testing
+        Button toBTDevices = (Button) findViewById(R.id.BTButton);
+        toBTDevices.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), BluetoothDeviceList.class);
+                startActivity(intent);
+            }
         });
     }
 
