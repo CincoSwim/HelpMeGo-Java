@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText editText;
     private SpeechRecognizer speechRecog;
     ArrayList<ArrayList<Integer>> BTGraph;
-    TextToSpeech tts;
+    public static TextToSpeech tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,6 +158,8 @@ public class MainActivity extends AppCompatActivity {
             */
 
         });
+
+        tts.speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.", TextToSpeech.QUEUE_ADD, null, null);
     }
 
 
