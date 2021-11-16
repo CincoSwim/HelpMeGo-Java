@@ -58,7 +58,9 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintHorizontal_bias="0.496"/>
+            app:layout_constraintHorizontal_bias="0.496"
+            android:onClick="startListen"/>
+
             <!--android:onClick="HelpMeGo"-->
             <!--The value for this attribute
             must be the name of the method you want to call in
@@ -66,7 +68,7 @@
             must then implement the corresponding method.-->
 
     <Button
-            android:id="@id/button_first"
+            android:id="@id/button_second"
             android:layout_width="373dp"
             android:layout_height="68dp"
             android:layout_marginEnd="20dp"

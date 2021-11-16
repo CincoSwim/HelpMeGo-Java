@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.view.MotionEvent;
 import android.widget.EditText;
 import androidx.core.app.ActivityCompat;
@@ -22,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -29,14 +31,37 @@ public class MainActivity extends AppCompatActivity {
     public static final Integer RecordAudioRequestCode = 1;
     private EditText editText;
     private SpeechRecognizer speechRecog;
+    ArrayList<ArrayList<Integer>> BTGraph;
+    public static TextToSpeech tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         editText = findViewById(R.id.edit_text);
-        editText.setHint("NOW WEre COOOK");
+        editText.setHint("Please input a destination.");
         setSupportActionBar(toolbar);
+
+        //Implement TTS Here
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS){
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
+                        Log.e("TTS ERROR", "Lang not Supported");
+
+                    }else{
+                        Log.e("TTS ERROR", "Init failure");
+                    }
+                }
+            }
+        });
+
+        tts.speak("Welcome to HelpMeGo!", TextToSpeech.QUEUE_ADD, null, null);
+        //BUILD/FILL BTGraph here!! Need to define int/beacon relationship
+        //addedge
+        //addedge
 
         //pucko added here
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
@@ -57,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
             public void onBeginningOfSpeech() {
                 editText.setText("");
                 editText.setHint("Listening...");
+                Log.d(TAG, "Listening to input on button press");
             }
 
             @Override
@@ -85,10 +111,22 @@ public class MainActivity extends AppCompatActivity {
                     editText.setText(data.get(0));
                     String testStr = data.get(0);
 
-                    int roomindex = testStr.indexOf("room") + 5;
-                    testStr += "(parsed room num: " + roomindex + ")";
+                    //int roomindex = testStr.indexOf("room") + 5;
+                    String ttsTester = testStr.substring(testStr.lastIndexOf("room"));
+                    testStr += "(parsed room num: " + ttsTester + ")";
+                    tts.speak("You want to go to " + ttsTester + ", right?", TextToSpeech.QUEUE_ADD, null, null);
 
                     editText.setText(testStr);
+
+                    /* Begin finding path*/
+                    //get closest BT Beacon identity
+                    //get appropriate destination beacon identity
+                    //Find path between the two - findShortestPath()
+
+                    //LinkedList<Integer> navPath = PathGraph.findShortestPath();
+                    //Move to next fragment for directing
+
+
             }
 
             @Override
@@ -109,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
                 if(event.getAction() == MotionEvent.ACTION_UP){
                     speechRecog.stopListening();
                 }if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    tts.speak("Now Listening.", TextToSpeech.QUEUE_ADD, null, null);
+
                     speechRecog.startListening(speechRecognizerIntent);
                 }
                 return false;
@@ -121,8 +161,11 @@ public class MainActivity extends AppCompatActivity {
             */
 
         });
-    }
 
+    }
+    private void startListen(View view){
+        //do something
+    }
 
     private void checkPermission(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -150,5 +193,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void speak(String text){
+        tts.speak(text, TextToSpeech.QUEUE_ADD, null, null);
     }
 }
