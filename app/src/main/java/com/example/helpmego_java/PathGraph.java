@@ -7,10 +7,18 @@ import java.util.LinkedList;
 
 public class PathGraph {
 
-
+    /*
+    * Function to return a linked list containing the path to travel along the graph.
+    * Takes in:
+    * adj: the adjacency graph (list<list<int>>)
+    * start: int representation of start node
+    * dest: int representation of destination node
+    * vertexes: number of points in the graph
+    * */
     public static LinkedList<Integer> findShortestPath(
             ArrayList<ArrayList<Integer>> adj, int start,
             int dest, int vertexes){
+
         int pred[] = new int[vertexes];
         int dist[] = new int[vertexes];
 
@@ -31,7 +39,7 @@ public class PathGraph {
 
     }
 
-    private static void addEdge(ArrayList<ArrayList<Integer>> adj, Integer first, Integer second) {
+    public static void addEdge(ArrayList<ArrayList<Integer>> adj, Integer first, Integer second) {
         adj.get(first).add(second);
         adj.get(second).add(first);
 
