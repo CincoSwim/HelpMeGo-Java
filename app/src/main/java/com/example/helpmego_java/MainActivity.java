@@ -10,6 +10,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.view.MotionEvent;
+import android.widget.Button;
 import android.widget.EditText;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -159,7 +160,17 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        // Added button to goto bluetooth device screen for testing
+        Button toBTDevices = (Button) findViewById(R.id.BTButton);
+        toBTDevices.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View view) {
+                Intent intent = new Intent(view.getContext(), BluetoothDeviceList.class);
+                startActivity(intent);
+            }
+        });
+
         tts.speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.", TextToSpeech.QUEUE_ADD, null, null);
+   
     }
 
 
