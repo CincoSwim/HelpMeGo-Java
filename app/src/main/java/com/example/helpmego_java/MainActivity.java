@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.view.MotionEvent;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -30,14 +32,36 @@ public class MainActivity extends AppCompatActivity {
     public static final Integer RecordAudioRequestCode = 1;
     private EditText editText;
     private SpeechRecognizer speechRecog;
+    ArrayList<ArrayList<Integer>> BTGraph;
+    public static TextToSpeech tts;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         editText = findViewById(R.id.edit_text);
-        editText.setHint("NOW WEre COOOK");
+        editText.setHint("Please input a destination.");
         setSupportActionBar(toolbar);
+
+        //Implement TTS Here
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS){
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
+                        Log.e("TTS ERROR", "Lang not Supported");
+
+                    }else{
+                        Log.e("TTS ERROR", "Init failure");
+                    }
+                }
+            }
+        });
+
+        //BUILD/FILL BTGraph here!! Need to define int/beacon relationship
+        //addedge
+        //addedge
 
         //pucko added here
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
@@ -58,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
             public void onBeginningOfSpeech() {
                 editText.setText("");
                 editText.setHint("Listening...");
+                Log.d(TAG, "Listening to input on button press");
             }
 
             @Override
@@ -86,10 +111,22 @@ public class MainActivity extends AppCompatActivity {
                     editText.setText(data.get(0));
                     String testStr = data.get(0);
 
-                    int roomindex = testStr.indexOf("room") + 5;
-                    testStr += "(parsed room num: " + roomindex + ")";
+                    //int roomindex = testStr.indexOf("room") + 5;
+                    String ttsTester = testStr.substring(testStr.lastIndexOf("room"));
+                    testStr += "(parsed room num: " + ttsTester + ")";
+                    tts.speak("You want to go to " + ttsTester + ", right?", TextToSpeech.QUEUE_ADD, null, null);
 
                     editText.setText(testStr);
+
+                    /* Begin finding path*/
+                    //get closest BT Beacon identity
+                    //get appropriate destination beacon identity
+                    //Find path between the two - findShortestPath()
+
+                    //LinkedList<Integer> navPath = PathGraph.findShortestPath();
+                    //Move to next fragment for directing
+
+
             }
 
             @Override
@@ -131,6 +168,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        tts.speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.", TextToSpeech.QUEUE_ADD, null, null);
+   
     }
 
 
@@ -160,5 +200,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void speak(String text){
+        tts.speak(text, TextToSpeech.QUEUE_ADD, null, null);
     }
 }
