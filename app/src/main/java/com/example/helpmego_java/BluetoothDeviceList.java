@@ -104,7 +104,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     }
 
     /**
-     * Called when the scan button is clicked.
+     * Called when clicking the scan button.
      */
     @Override
     public void onClick(View v) {
