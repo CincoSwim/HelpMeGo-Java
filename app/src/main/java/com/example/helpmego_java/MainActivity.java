@@ -26,14 +26,19 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyApp";
     public static final Integer RecordAudioRequestCode = 1;
+    public static ArrayList<ArrayList<Integer>> floorGraph;
+    public static ArrayList<LocationLinkedObj> beacons; //there's gotta be a cleaner way for this
+    public static LinkedList<Integer> currentRoute;
     private EditText editText;
     private SpeechRecognizer speechRecog;
-    ArrayList<ArrayList<Integer>> BTGraph;
     public static TextToSpeech tts;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
         editText = findViewById(R.id.edit_text);
         editText.setHint("Please input a destination.");
         setSupportActionBar(toolbar);
+
+        //Load in static maps?
+
+        makeTestGraph();
+
+
+        //end load of static maps
+
 
         //Implement TTS Here
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -59,9 +72,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //BUILD/FILL BTGraph here!! Need to define int/beacon relationship
-        //addedge
-        //addedge
 
         //pucko added here
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
@@ -80,9 +90,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onBeginningOfSpeech() {
+                Log.d(TAG, "Listening to input on button press");
                 editText.setText("");
                 editText.setHint("Listening...");
-                Log.d(TAG, "Listening to input on button press");
+
             }
 
             @Override
@@ -107,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onResults(Bundle results) {
+                    Log.d(TAG, "STT onResults() starting...");
                     ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                     editText.setText(data.get(0));
                     String testStr = data.get(0);
@@ -115,17 +127,21 @@ public class MainActivity extends AppCompatActivity {
                     String ttsTester = testStr.substring(testStr.lastIndexOf("room"));
                     testStr += "(parsed room num: " + ttsTester + ")";
                     tts.speak("You want to go to " + ttsTester + ", right?", TextToSpeech.QUEUE_ADD, null, null);
-
+                    Log.d(TAG, "onResults: string manip finished");
                     editText.setText(testStr);
 
                     /* Begin finding path*/
+                    Log.d(TAG, "onResults: finding path...");
                     //get closest BT Beacon identity
+                    //lookupIntByBeaconID()
+                    int start = 1;
                     //get appropriate destination beacon identity
+                    //lookupIntByRoomNum()
+                    int dest = 4;
                     //Find path between the two - findShortestPath()
-
-                    //LinkedList<Integer> navPath = PathGraph.findShortestPath();
-                    //Move to next fragment for directing
-
+                    currentRoute = PathGraph.findShortestPath(floorGraph, start, dest, 6);
+                    Log.d(TAG, "onResults: path found, stored in currentRoute");
+                    /*end finding path, move to nav*/
 
             }
 
@@ -139,24 +155,19 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnTouchListener(new View.OnTouchListener() {
+        Button mainButton = findViewById(R.id.button_first);
+        mainButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if(event.getAction() == MotionEvent.ACTION_UP){
+                    Log.d(TAG, "mainButton sees UP");
                     speechRecog.stopListening();
                 }if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    Log.d(TAG, "mainButton sees DOWN");
                     speechRecog.startListening(speechRecognizerIntent);
                 }
                 return false;
             }
-
-
-
-                /*Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            */
 
         });
 
@@ -203,6 +214,43 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void speak(String text){
+        Log.d(TAG, "TTS Speak() called");
         tts.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+    }
+
+    private void makeTestGraph(){
+        Log.d(TAG, "filling adj graph");
+        PathGraph.addEdge(floorGraph, 0, 1);
+        PathGraph.addEdge(floorGraph, 1, 2);
+        PathGraph.addEdge(floorGraph, 2, 3);
+        PathGraph.addEdge(floorGraph, 3, 4);
+        PathGraph.addEdge(floorGraph, 4, 1);
+        PathGraph.addEdge(floorGraph, 5, 4);
+        Log.d(TAG, "graph filled");
+
+    };
+    private int lookupIntByBeaconID(String BUID, ArrayList<LocationLinkedObj> bList){
+        //for each object in bList
+        Log.d(TAG, "lookup by BeaconID Started");
+        for (LocationLinkedObj beac: bList) {
+            if(beac.getBeaconID().equals(BUID)){
+                Log.d(TAG, "ID found: " + beac.getUniqueInt());
+                return beac.getUniqueInt();
+            }
+        }
+        //no match, return dummy val
+        Log.d(TAG, "No ID found, defaulting");
+        return 99;
+    }
+    private int lookupIntByRoomNum(String Room, ArrayList<LocationLinkedObj> bList){
+        for (LocationLinkedObj beac: bList) {
+            if(beac.roomIDs.contains(Room)){
+                Log.d(TAG, "ID found: " + beac.getUniqueInt());
+                return beac.getUniqueInt();
+            }
+        }
+        //no match, return dummy val
+        Log.d(TAG, "No ID found, defaulting");
+        return 99;
     }
 }
