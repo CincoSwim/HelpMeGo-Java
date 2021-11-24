@@ -9,7 +9,7 @@
 
     <!--Cancel Navigation -->
     <Button
-            android:id="@id/Cancel_Button"
+            android:id="@+id/Cancel_Button"
             android:layout_width="373dp"
             android:layout_height="68dp"
             android:layout_marginEnd="20dp"
@@ -27,7 +27,7 @@
 
     <!--Help and About-->
     <Button
-            android:id="@id/Help_About_Button"
+            android:id="@+id/Help_About_Button"
             android:layout_width="373dp"
             android:layout_height="68dp"
             android:layout_marginEnd="20dp"

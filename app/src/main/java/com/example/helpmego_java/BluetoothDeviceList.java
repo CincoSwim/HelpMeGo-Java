@@ -31,6 +31,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.btle_device_main);
 
+
+
+
         // Checks if BLE is supported on device
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Utility_Func.toast(getApplicationContext(), "BLE not supported");

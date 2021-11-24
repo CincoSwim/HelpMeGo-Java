@@ -86,7 +86,7 @@ public class Scanner_BTLE {
     private ScanCallback mLeScanCallback = new ScanCallback() {
 
         @Override
-        public void onScanResult(int callbackType, ScanResult result) {
+        public void onScanResult(int callbackType, final ScanResult result) {
 
             final int new_rssi = result.getRssi();
             if (result.getRssi() > signalStrength) {

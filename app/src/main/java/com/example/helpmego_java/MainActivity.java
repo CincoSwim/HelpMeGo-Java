@@ -31,7 +31,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyApp";
     public static final Integer RecordAudioRequestCode = 1;
-    public static ArrayList<ArrayList<Integer>> floorGraph;
+    public static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
     public static ArrayList<LocationLinkedObj> beacons; //there's gotta be a cleaner way for this
     public static LinkedList<Integer> currentRoute;
     private EditText editText;
@@ -51,7 +51,9 @@ public class MainActivity extends AppCompatActivity {
 
 
         //Load in static maps?
-
+        for (int i=0; i<=5; i++){
+            floorGraph.add(i, new ArrayList<Integer>());
+        }
         makeTestGraph();
 
 
@@ -125,13 +127,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResults(Bundle results) {
                     Log.d(TAG, "STT onResults() starting...");
+                    String ttsTester = "";
                     ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
                     editText.setText(data.get(0));
                     String testStr = data.get(0);
-
+                    int lastindex = testStr.lastIndexOf("room");
+                    if(lastindex == -1){
+                        testStr = "heard nothing!";
+                    }else{
+                        ttsTester = testStr.substring(lastindex);
+                        testStr += "(parsed room num: " + ttsTester + ")";
+                    }
                     //int roomindex = testStr.indexOf("room") + 5;
-                    String ttsTester = testStr.substring(testStr.lastIndexOf("room"));
-                    testStr += "(parsed room num: " + ttsTester + ")";
+
                     tts.speak("You want to go to " + ttsTester + ", right?", TextToSpeech.QUEUE_ADD, null, null);
 
                     Log.d(TAG, "onResults: string manip finished");
@@ -188,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
         toBTDevices.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), BluetoothDeviceList.class);
+
                 startActivity(intent);
             }
         });
@@ -198,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    }
+
     private void startListen(View view){
         //do something
     }
@@ -239,6 +248,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void makeTestGraph(){
         Log.d(TAG, "filling adj graph");
+
         PathGraph.addEdge(floorGraph, 0, 1);
         PathGraph.addEdge(floorGraph, 1, 2);
         PathGraph.addEdge(floorGraph, 2, 3);
