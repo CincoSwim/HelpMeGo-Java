@@ -1,15 +1,24 @@
 package com.example.helpmego_java;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
 
 public class LocationLinkedObj {
     protected String BeaconID; //unique id for a ble beacon
-
-    protected LocationLinkedObj nextLocation, prevLocation;
+    public int UniqueInt; //identifies integer node to this beacon obj
     protected ArrayList<String> roomIDs; //room # considered "at" this beacon
+    public Dictionary<Integer, String> DirectionsTo; //details human directions to connected nodes
 
-    protected enum listNavDirections{
-        //forward and backward directions, turns, etc
+    /*default/null constructor*/
+    public LocationLinkedObj() {
+    }
+
+    /*fully qualified constructor*/
+    public LocationLinkedObj(String beaconID, int uniqueInt, ArrayList<String> roomIDs, Dictionary<Integer, String> directionsTo) {
+        BeaconID = beaconID;
+        UniqueInt = uniqueInt;
+        this.roomIDs = roomIDs;
+        DirectionsTo = directionsTo;
     }
 
 
@@ -20,12 +29,12 @@ public class LocationLinkedObj {
      */
 
 
-    public LocationLinkedObj getPrevLocation() {
-        return prevLocation;
+    public int getUniqueInt() {
+        return UniqueInt;
     }
 
-    public void setPrevLocation(LocationLinkedObj prevLocation) {
-        this.prevLocation = prevLocation;
+    public void setUniqueInt(int uniqueInt) {
+        UniqueInt = uniqueInt;
     }
 
     public String getBeaconID() {
@@ -34,14 +43,6 @@ public class LocationLinkedObj {
 
     public void setBeaconID(String beaconID) {
         BeaconID = beaconID;
-    }
-
-    public LocationLinkedObj getNextLocation() {
-        return nextLocation;
-    }
-
-    public void setNextLocation(LocationLinkedObj nextLocation) {
-        this.nextLocation = nextLocation;
     }
 
     public ArrayList<String> getRoomIDs() {

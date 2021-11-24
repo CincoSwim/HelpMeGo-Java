@@ -23,7 +23,6 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <include layout="@layout/content_main"/>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
@@ -31,6 +30,7 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="@dimen/fab_margin"
             app:srcCompat="@android:drawable/ic_dialog_email"/>
+
             <!--android:text="Help"-->
 
     <EditText
@@ -86,6 +86,7 @@
             must be the name of the method you want to call in
             response to a click event. The Activity hosting the layout
             must then implement the corresponding method.-->
+
 
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
