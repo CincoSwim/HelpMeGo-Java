@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="button_second" type="id">Cancel_Button</item>
+    <item name="Cancel_Button" type="id">Cancel_Button</item>
+    <item name="Help_About_Button" type="id">Help_About_Button</item>
+</resources>
