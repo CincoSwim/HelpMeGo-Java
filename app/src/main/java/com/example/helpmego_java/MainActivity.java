@@ -36,8 +36,9 @@ public class MainActivity extends AppCompatActivity {
     public static LinkedList<Integer> currentRoute;
     private EditText editText;
     private SpeechRecognizer speechRecog;
-    public static TextToSpeech tts;
 
+    ArrayList<ArrayList<Integer>> BTGraph;
+    public static TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,7 @@ public class MainActivity extends AppCompatActivity {
         editText = findViewById(R.id.edit_text);
         editText.setHint("Please input a destination.");
         setSupportActionBar(toolbar);
+
 
         //Load in static maps?
 
@@ -72,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        tts.speak("Welcome to HelpMeGo!", TextToSpeech.QUEUE_ADD, null, null);
+
 
         //pucko added here
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
@@ -93,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "Listening to input on button press");
                 editText.setText("");
                 editText.setHint("Listening...");
+
+                Log.d(TAG, "Listening to input on button press");
 
             }
 
@@ -127,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     String ttsTester = testStr.substring(testStr.lastIndexOf("room"));
                     testStr += "(parsed room num: " + ttsTester + ")";
                     tts.speak("You want to go to " + ttsTester + ", right?", TextToSpeech.QUEUE_ADD, null, null);
+
                     Log.d(TAG, "onResults: string manip finished");
                     editText.setText(testStr);
 
@@ -142,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     currentRoute = PathGraph.findShortestPath(floorGraph, start, dest, 6);
                     Log.d(TAG, "onResults: path found, stored in currentRoute");
                     /*end finding path, move to nav*/
+
 
             }
 
@@ -163,7 +171,11 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "mainButton sees UP");
                     speechRecog.stopListening();
                 }if(event.getAction() == MotionEvent.ACTION_DOWN){
+
                     Log.d(TAG, "mainButton sees DOWN");
+                    tts.speak("Now Listening.", TextToSpeech.QUEUE_ADD, null, null);
+
+
                     speechRecog.startListening(speechRecognizerIntent);
                 }
                 return false;
@@ -180,10 +192,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+
         tts.speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.", TextToSpeech.QUEUE_ADD, null, null);
    
     }
 
+
+    }
+    private void startListen(View view){
+        //do something
+    }
 
     private void checkPermission(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
@@ -214,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void speak(String text){
+
         Log.d(TAG, "TTS Speak() called");
         tts.speak(text, TextToSpeech.QUEUE_ADD, null, null);
     }
@@ -253,4 +272,5 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "No ID found, defaulting");
         return 99;
     }
+
 }
