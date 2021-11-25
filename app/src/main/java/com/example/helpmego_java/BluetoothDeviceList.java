@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class BluetoothDeviceList extends AppCompatActivity implements View.OnClickListener {
 
@@ -20,6 +21,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private HashMap<String, BTLE_Device> btDevicesHashMap;
     private ArrayList<BTLE_Device> btDevicesArrayList;
     private ArrayList<LocationLinkedObj> beacons;
+    private LinkedList<Integer> currentRoute;
     private ListAdapter_BTLE adapter;
 
     private Button btn_Scan;
@@ -30,7 +32,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.btle_device_main);
+        setContentView(R.layout.fragment_second);
 
 
 
@@ -46,18 +48,18 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btDevicesHashMap = new HashMap<>();
         btDevicesArrayList = new ArrayList<>();
         beacons = (ArrayList<LocationLinkedObj>) getIntent().getSerializableExtra("beaconsList");
-
+        currentRoute = MainActivity.currentRoute;
         adapter = new ListAdapter_BTLE(this, R.layout.btle_device_list, btDevicesArrayList);
 
         ListView listView = new ListView(this);
         listView.setAdapter(adapter);
 
-        btn_Scan = findViewById(R.id.btn_scan);
-        ((ScrollView) findViewById(R.id.scrollView)).addView(listView);
-        findViewById(R.id.btn_scan).setOnClickListener(this);
+        btn_Scan = findViewById(R.id.Help_About_Button);
+        //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
+        //findViewById(R.id.btn_scan).setOnClickListener(this);
 
         // Sets back button to return to previous screen
-        btn_Back = findViewById(R.id.backButton);
+        btn_Back = findViewById(R.id.Cancel_Button);
         btn_Back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,7 +116,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
 
-        if (v.getId() == R.id.btn_scan) {
+        if (v.getId() == R.id.Help_About_Button) {
             Utility_Func.toast(getApplicationContext(), "Scan Button Pressed");
 
             if (!btScanner.isScanning()) {
@@ -169,6 +171,18 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
      */
     public void stopScan() {
         btn_Scan.setText("Scan Again");
+
+        //get closest beacon
+        BTLE_Device closest = btDevicesArrayList.get(0);
+        for (BTLE_Device btDev:btDevicesArrayList) {
+            if(btDev.getRSSI() < closest.getRSSI()){
+                closest = btDev;
+            }
+        }
+        if(closest.getName() == beacons.get(MainActivity.currentRoute.peek()).getBeaconID() ){
+            //change to next one
+            MainActivity.currentRoute.pop();
+        }
         btScanner.stop();
     }
 }

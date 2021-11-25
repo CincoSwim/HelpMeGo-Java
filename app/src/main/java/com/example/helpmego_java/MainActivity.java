@@ -31,9 +31,9 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyApp";
     public static final Integer RecordAudioRequestCode = 1;
-    public static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
-    public static ArrayList<LocationLinkedObj> beacons; //there's gotta be a cleaner way for this
-    public static LinkedList<Integer> currentRoute;
+    protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
+    protected static ArrayList<LocationLinkedObj> beacons; //there's gotta be a cleaner way for this
+    protected static LinkedList<Integer> currentRoute;
     private EditText editText;
     private SpeechRecognizer speechRecog;
 
@@ -178,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
                 if(event.getAction() == MotionEvent.ACTION_UP){
                     Log.d(TAG, "mainButton sees UP");
                     speechRecog.stopListening();
+                    Log.d(TAG, "stopped listening");
                 }if(event.getAction() == MotionEvent.ACTION_DOWN){
 
                     Log.d(TAG, "mainButton sees DOWN");
@@ -185,6 +186,7 @@ public class MainActivity extends AppCompatActivity {
 
 
                     speechRecog.startListening(speechRecognizerIntent);
+                    Log.d(TAG, "started listening");
                 }
                 return false;
             }
@@ -196,7 +198,6 @@ public class MainActivity extends AppCompatActivity {
         toBTDevices.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), BluetoothDeviceList.class);
-                intent.putExtra("navList", currentRoute);
                 intent.putExtra("beaconList", beacons);
                 startActivity(intent);
             }
