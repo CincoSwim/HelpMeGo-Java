@@ -1,9 +1,10 @@
 package com.example.helpmego_java;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Dictionary;
 
-public class LocationLinkedObj {
+public class LocationLinkedObj implements Serializable {
     protected String BeaconID; //unique id for a ble beacon
     public int UniqueInt; //identifies integer node to this beacon obj
     protected ArrayList<String> roomIDs; //room # considered "at" this beacon

@@ -196,7 +196,8 @@ public class MainActivity extends AppCompatActivity {
         toBTDevices.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), BluetoothDeviceList.class);
-
+                intent.putExtra("navList", currentRoute);
+                intent.putExtra("beaconList", beacons);
                 startActivity(intent);
             }
         });

@@ -19,6 +19,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
     private HashMap<String, BTLE_Device> btDevicesHashMap;
     private ArrayList<BTLE_Device> btDevicesArrayList;
+    private ArrayList<LocationLinkedObj> beacons;
     private ListAdapter_BTLE adapter;
 
     private Button btn_Scan;
@@ -44,6 +45,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
         btDevicesHashMap = new HashMap<>();
         btDevicesArrayList = new ArrayList<>();
+        beacons = (ArrayList<LocationLinkedObj>) getIntent().getSerializableExtra("beaconsList");
 
         adapter = new ListAdapter_BTLE(this, R.layout.btle_device_list, btDevicesArrayList);
 
