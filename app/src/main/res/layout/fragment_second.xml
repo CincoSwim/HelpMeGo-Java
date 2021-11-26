@@ -59,7 +59,7 @@
     <!--image.jpeg-->
     <!--Actual image will come from the code-->
     <ImageView
-            android:src="@android:drawable/ic_dialog_alert"
+            android:src="@drawable/leftarrow"
             android:layout_width="366dp"
             android:layout_height="335dp" android:id="@+id/imageView" tools:layout_editor_absoluteY="101dp"
             android:layout_marginEnd="20dp" app:layout_constraintEnd_toEndOf="parent"
