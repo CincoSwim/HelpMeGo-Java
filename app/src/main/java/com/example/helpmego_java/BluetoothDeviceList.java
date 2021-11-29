@@ -56,7 +56,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         }else{
             dest = extras.getInt("dest");
         }
-        currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
+
         adapter = new ListAdapter_BTLE(this, R.layout.btle_device_list, btDevicesArrayList);
 
         ListView listView = new ListView(this);
@@ -65,7 +65,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btn_Scan = findViewById(R.id.Help_About_Button);
         btn_Scan.setOnClickListener(this);
         //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
-
+        startScan();
+        start = findClosestBeacon();
+        currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
         // Sets back button to return to previous screen
         btn_Back = findViewById(R.id.Cancel_Button);
         btn_Back.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +76,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
                 finish();
             }
         });
+        //ENTER NAVIGATION LOOP HERE SOMEHOW
+
+
     }
 
     @Override
@@ -184,7 +189,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
         btScanner.stop();
     }
-    public void findClosestBeacon(){
+    public void recheckClosestBeacon(){
         BTLE_Device closest = btDevicesArrayList.get(0);
         for (BTLE_Device btDev:btDevicesArrayList) {
             if(btDev.getRSSI() < closest.getRSSI()){
@@ -195,5 +200,15 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             //change to next one
             MainActivity.currentRoute.pop();
         }
+    }
+    public int findClosestBeacon(){
+        BTLE_Device closest = btDevicesArrayList.get(0);
+        for (BTLE_Device btDev:btDevicesArrayList) {
+            if(btDev.getRSSI() < closest.getRSSI()){
+                closest = btDev;
+            }
+        }
+        int closestNode = MainActivity.lookupIntByBeaconID(closest.getName(), beacons);
+        return closestNode;
     }
 }

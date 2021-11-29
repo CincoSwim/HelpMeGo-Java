@@ -289,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
         beacons.get(4).addDirection(1, "left");
         Log.d(TAG, "list of LocationLinkedObjs (beacons) filled");
     };
-    private int lookupIntByBeaconID(String BUID, ArrayList<LocationLinkedObj> bList){
+    public static int lookupIntByBeaconID(String BUID, ArrayList<LocationLinkedObj> bList){
         //for each object in bList
         Log.d(TAG, "lookup by BeaconID Started");
         for (LocationLinkedObj beac: bList) {
