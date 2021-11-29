@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_second);
-
+        TextView navText = (TextView) findViewById(R.id.Text_Directions);
 
 
 
@@ -77,7 +78,12 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             }
         });
         //ENTER NAVIGATION LOOP HERE SOMEHOW
-
+        while(!currentRoute.isEmpty()){
+            LocationLinkedObj currentNode = beacons.get(currentRoute.peek());
+            navText.setText(currentNode.DirectionsTo.get(currentRoute.get(1)));
+            /*need to set imageView here, potentially flip it*/
+            recheckClosestBeacon();
+        }
 
     }
 
@@ -198,7 +204,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         }
         if(closest.getName().equals(beacons.get(MainActivity.currentRoute.peek()).getBeaconID() )){
             //change to next one
-            MainActivity.currentRoute.pop();
+            MainActivity.currentRoute.pop(); //this'll probably throw a null pointer if we get to the end of the route...
         }
     }
     public int findClosestBeacon(){
