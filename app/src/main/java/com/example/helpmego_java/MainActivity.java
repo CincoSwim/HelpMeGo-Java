@@ -32,11 +32,12 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MyApp";
     public static final Integer RecordAudioRequestCode = 1;
     protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
-    protected static ArrayList<LocationLinkedObj> beacons; //there's gotta be a cleaner way for this
+    protected static ArrayList<LocationLinkedObj> beacons = new ArrayList<LocationLinkedObj>(); //there's gotta be a cleaner way for this
     protected static LinkedList<Integer> currentRoute;
     private EditText editText;
     private SpeechRecognizer speechRecog;
-
+    int start = 1;
+    int dest = 4;
     ArrayList<ArrayList<Integer>> BTGraph;
     public static TextToSpeech tts;
 
@@ -148,13 +149,13 @@ public class MainActivity extends AppCompatActivity {
                     /* Begin finding path*/
                     Log.d(TAG, "onResults: finding path...");
                     //get closest BT Beacon identity
-                    //lookupIntByBeaconID()
-                    int start = 1;
+
+
                     //get appropriate destination beacon identity
                     //lookupIntByRoomNum()
-                    int dest = 4;
+
                     //Find path between the two - findShortestPath()
-                    currentRoute = PathGraph.findShortestPath(floorGraph, start, dest, 6);
+
                     Log.d(TAG, "onResults: path found, stored in currentRoute");
                     /*end finding path, move to nav*/
 
@@ -198,7 +199,8 @@ public class MainActivity extends AppCompatActivity {
         toBTDevices.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), BluetoothDeviceList.class);
-                intent.putExtra("beaconList", beacons);
+
+                intent.putExtra("dest", dest);
                 startActivity(intent);
             }
         });
@@ -256,9 +258,36 @@ public class MainActivity extends AppCompatActivity {
         PathGraph.addEdge(floorGraph, 2, 3);
         PathGraph.addEdge(floorGraph, 3, 4);
         PathGraph.addEdge(floorGraph, 4, 1);
-        PathGraph.addEdge(floorGraph, 5, 4);
         Log.d(TAG, "graph filled");
+        Log.d(TAG, "filling LocationLinkedObjs");
 
+        beacons.add(0, new LocationLinkedObj("1", 0));
+        beacons.add(1, new LocationLinkedObj("2", 1));
+        beacons.add(2, new LocationLinkedObj("3", 2));
+        beacons.add(3, new LocationLinkedObj("4", 3));
+        beacons.add(4, new LocationLinkedObj("5", 4));
+        //set beacon 1 data
+        beacons.get(0).addRoomID("203");
+        beacons.get(0).addRoomID("204");
+        beacons.get(0).addDirection(1, "forward");
+        //set beacon 2 data
+        beacons.get(1).addDirection(0, "back");
+        beacons.get(1).addDirection(2, "forward");
+        beacons.get(1).addDirection(4, "right");
+        //set beacon 3 data
+        beacons.get(2).addRoomID("205");
+        beacons.get(2).addDirection(1, "back");
+        beacons.get(2).addDirection(3, "right");
+        //set beacon 4 data
+        beacons.get(3).addRoomID("206");
+        beacons.get(3).addDirection(2, "left");
+        beacons.get(3).addDirection(4, "back");
+        //set beacon 5 data
+        beacons.get(4).addRoomID("207");
+        beacons.get(4).addRoomID("208");
+        beacons.get(4).addDirection(3, "forward");
+        beacons.get(4).addDirection(1, "left");
+        Log.d(TAG, "list of LocationLinkedObjs (beacons) filled");
     };
     private int lookupIntByBeaconID(String BUID, ArrayList<LocationLinkedObj> bList){
         //for each object in bList

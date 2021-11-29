@@ -28,6 +28,8 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private Button btn_Back;
 
     private Scanner_BTLE btScanner;
+    int dest;
+    int start = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,16 +49,22 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
         btDevicesHashMap = new HashMap<>();
         btDevicesArrayList = new ArrayList<>();
-        beacons = (ArrayList<LocationLinkedObj>) getIntent().getSerializableExtra("beaconsList");
-        currentRoute = MainActivity.currentRoute;
+        beacons = MainActivity.beacons;
+        Bundle extras = getIntent().getExtras();
+        if(extras == null){
+            dest = 4;
+        }else{
+            dest = extras.getInt("dest");
+        }
+        currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
         adapter = new ListAdapter_BTLE(this, R.layout.btle_device_list, btDevicesArrayList);
 
         ListView listView = new ListView(this);
         listView.setAdapter(adapter);
 
         btn_Scan = findViewById(R.id.Help_About_Button);
+        btn_Scan.setOnClickListener(this);
         //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
-        //findViewById(R.id.btn_scan).setOnClickListener(this);
 
         // Sets back button to return to previous screen
         btn_Back = findViewById(R.id.Cancel_Button);
@@ -173,16 +181,19 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btn_Scan.setText("Scan Again");
 
         //get closest beacon
+
+        btScanner.stop();
+    }
+    public void findClosestBeacon(){
         BTLE_Device closest = btDevicesArrayList.get(0);
         for (BTLE_Device btDev:btDevicesArrayList) {
             if(btDev.getRSSI() < closest.getRSSI()){
                 closest = btDev;
             }
         }
-        if(closest.getName() == beacons.get(MainActivity.currentRoute.peek()).getBeaconID() ){
+        if(closest.getName().equals(beacons.get(MainActivity.currentRoute.peek()).getBeaconID() )){
             //change to next one
             MainActivity.currentRoute.pop();
         }
-        btScanner.stop();
     }
 }
