@@ -10,8 +10,7 @@ import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.view.MotionEvent;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.*;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -23,12 +22,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Locale;
-import java.util.Objects;
+import java.util.*;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "MyApp";
     public static final Integer RecordAudioRequestCode = 1;
     protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
@@ -49,6 +45,18 @@ public class MainActivity extends AppCompatActivity {
         editText = findViewById(R.id.edit_text);
         editText.setHint("Please input a destination.");
         setSupportActionBar(toolbar);
+        //fill spinner
+        Spinner spinner = (Spinner) findViewById(R.id.spinner);
+        List<String> rooms = new ArrayList<String>();
+        rooms.add("203");
+        rooms.add("204");
+        rooms.add("205");
+        rooms.add("206");
+        rooms.add("207");
+        rooms.add("208");
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, rooms);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
 
 
         //Load in static maps?
@@ -252,6 +260,8 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+
     private void speak(String text){
 
         Log.d(TAG, "TTS Speak() called");
@@ -322,4 +332,27 @@ public class MainActivity extends AppCompatActivity {
         return 99;
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String item = parent.getItemAtPosition(position).toString();
+        dest = lookupIntByRoomNum(item, beacons);
+        if(dest < 0) dest = 0;
+
+        //Find path between the two - findShortestPath()
+        //^ this is now done in the new activity!
+
+        Log.d(TAG, "onResults: dest parsed, moving to BluetoothDeviceList activity");
+        /*end finding path, move to nav*/
+        Log.d(TAG, "making murderous intent");
+        Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
+
+        intent.putExtra("dest", dest);
+        Log.d(TAG, "intent filled, moving to activity");
+        startActivity(intent);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+        //TODO Auto generated stub
+    }
 }

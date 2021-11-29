@@ -25,7 +25,7 @@
     <EditText
             android:id="@+id/edit_text"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="wrap_content"
             android:layout_marginRight="15dp"
             android:layout_marginLeft="15dp"
             android:layout_marginTop="60dp"
@@ -36,7 +36,7 @@
     <Button
             android:id="@+id/button_first"
             android:layout_width="373dp"
-            android:layout_height="469dp"
+            android:layout_height="476dp"
             android:layout_gravity="center"
             android:text="@string/HelpMeGo"
             android:textColor="@android:color/white"
@@ -48,7 +48,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.496"
-            />
+    />
 
             <!--android:onClick="HelpMeGo"-->
             <!--The value for this attribute
@@ -75,6 +75,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/BTButton" app:layout_anchorGravity="top|center"
             app:layout_anchor="@+id/button_second"/>
+    <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner"/>
     <!--android:onClick="HelpMeGo"-->
             <!--The value for this attribute
             must be the name of the method you want to call in
