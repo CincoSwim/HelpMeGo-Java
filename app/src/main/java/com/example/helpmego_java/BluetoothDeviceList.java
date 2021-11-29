@@ -84,6 +84,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             /*need to set imageView here, potentially flip it*/
             recheckClosestBeacon();
         }
+        if(currentRoute.isEmpty()){
+            setContentView(R.layout.fragment_first);
+        }
 
     }
 

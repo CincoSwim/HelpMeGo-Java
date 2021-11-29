@@ -152,12 +152,20 @@ public class MainActivity extends AppCompatActivity {
 
 
                     //get appropriate destination beacon identity
-                    //lookupIntByRoomNum()
+                    dest = lookupIntByRoomNum(ttsTester, beacons);
+                    if(dest < 0) dest = 0;
 
                     //Find path between the two - findShortestPath()
+                    //^ this is now done in the new activity!
 
-                    Log.d(TAG, "onResults: path found, stored in currentRoute");
+                    Log.d(TAG, "onResults: dest parsed, moving to BluetoothDeviceList activity");
                     /*end finding path, move to nav*/
+                    Log.d(TAG, "making murderous intent");
+                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
+
+                    intent.putExtra("dest", dest);
+                    Log.d(TAG, "intent filled, moving to activity");
+                    startActivity(intent);
 
 
             }
