@@ -1,6 +1,7 @@
 package com.example.helpmego_java;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -27,11 +28,13 @@ import java.util.*;
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = "MyApp";
     public static final Integer RecordAudioRequestCode = 1;
+    private final int REQ_CODE_SPEECH_INPUT = 100;
     protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
     protected static ArrayList<LocationLinkedObj> beacons = new ArrayList<LocationLinkedObj>(); //there's gotta be a cleaner way for this
     protected static LinkedList<Integer> currentRoute;
     private EditText editText;
-    private SpeechRecognizer speechRecog;
+    protected static String STT_STRING = "";
+    private static SpeechRecognizer speechRecog;
     int start = 1;
     int dest = 4;
     ArrayList<ArrayList<Integer>> BTGraph;
@@ -94,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
             checkPermission();
         }
+
+
+        /* remove to go back to prior speech method
         speechRecog = SpeechRecognizer.createSpeechRecognizer(this);
         final Intent speechRecognizerIntent = new Intent (RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -156,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     Log.d(TAG, "onResults: string manip finished");
                     editText.setText(testStr);
 
-                    /* Begin finding path*/
+                    // Begin finding path
                     Log.d(TAG, "onResults: finding path...");
                     //get closest BT Beacon identity
 
@@ -169,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     //^ this is now done in the new activity!
 
                     Log.d(TAG, "onResults: dest parsed, moving to BluetoothDeviceList activity");
-                    /*end finding path, move to nav*/
+                    //end finding path, move to nav
                     Log.d(TAG, "making murderous intent");
                     Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
 
@@ -180,17 +186,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
             }
 
+
+        });
+        */
+
+
+
+
+        Button mainButton = findViewById(R.id.button_first);
+        mainButton.setOnClickListener(new View.OnClickListener(){
+
             @Override
-            public void onPartialResults(Bundle partialResults) {
+            public void onClick(View v) {
+                String parsedRoom;
+                promptSpeechInput(); //this continues before getting the STT input!
+                int lastindex = STT_STRING.lastIndexOf("room");
+                if(lastindex == -1){
+                    parsedRoom = "heard nothing!";
+                    Log.e(TAG, "no room parsed - check voice input");
+                    Toast.makeText(getApplicationContext(), "nothing heard", Toast.LENGTH_SHORT).show();
+                }else{
+                    parsedRoom = STT_STRING.substring(lastindex);
+                    dest = lookupIntByRoomNum(parsedRoom, beacons);
+                    if(dest == 99) dest = 0;
+                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
 
-            }
-
-            @Override
-            public void onEvent(int eventType, Bundle params) {
-
+                    intent.putExtra("dest", dest);
+                    Log.d(TAG, "intent filled, moving to activity");
+                    startActivity(intent);
+                }
             }
         });
-        Button mainButton = findViewById(R.id.button_first);
+        /* remove comment to go back to prior voice input implementation
         mainButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -210,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 return false;
             }
 
-        });
+        }); */
 
         // Added button to goto bluetooth device screen for testing
         Button toBTDevices = (Button) findViewById(R.id.BTButton);
@@ -357,5 +384,33 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         //TODO Auto generated stub
+    }
+
+    private void promptSpeechInput(){
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        try{ startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);}
+        catch (ActivityNotFoundException a){
+            Toast.makeText(getApplicationContext(), "Speech not supported", Toast.LENGTH_SHORT).show();
+        }
+
+        return;
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch(requestCode){
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data){
+                    ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    //can get string from result.get(0);
+                    STT_STRING = result.get(0);
+
+                }
+                break;
+            }
+        }
     }
 }
