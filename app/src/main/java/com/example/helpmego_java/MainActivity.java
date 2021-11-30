@@ -33,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected static ArrayList<LocationLinkedObj> beacons = new ArrayList<LocationLinkedObj>(); //there's gotta be a cleaner way for this
     protected static LinkedList<Integer> currentRoute;
     private EditText editText;
+    private Spinner spinner;
+    List<String> rooms;
     protected static String STT_STRING = "";
     private static SpeechRecognizer speechRecog;
     int start = 1;
@@ -49,8 +51,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         editText.setHint("");
         setSupportActionBar(toolbar);
         //fill spinner
-        Spinner spinner = (Spinner) findViewById(R.id.spinner);
-        List<String> rooms = new ArrayList<String>();
+        spinner = (Spinner) findViewById(R.id.spinner);
+        rooms = new ArrayList<String>();
         rooms.add("Pick a room number!");
         rooms.add("203");
         rooms.add("204");
@@ -400,6 +402,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
+        String parsedRoom;
 
         switch(requestCode){
             case REQ_CODE_SPEECH_INPUT: {
@@ -407,6 +410,23 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
                     //can get string from result.get(0);
                     STT_STRING = result.get(0);
+                    int lastindex = STT_STRING.lastIndexOf("room");
+                    if(lastindex == -1){
+                        parsedRoom = "heard nothing!";
+                        Log.e(TAG, "no room parsed - check voice input");
+                        Toast.makeText(getApplicationContext(), "nothing heard", Toast.LENGTH_SHORT).show();
+                    }else {
+                        parsedRoom = STT_STRING.substring(lastindex + 5);
+                        dest = lookupIntByRoomNum(parsedRoom, beacons);
+                        if (dest == 99) return;
+                        Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
+
+                        intent.putExtra("dest", dest);
+                        Log.d(TAG, "intent filled, moving to activity");
+                        STT_STRING = "";
+                        startActivity(intent);
+                    }
+
 
                 }
                 break;
