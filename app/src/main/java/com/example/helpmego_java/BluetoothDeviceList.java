@@ -67,7 +67,14 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btn_Scan.setOnClickListener(this);
         //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
         startScan();
-        start = findClosestBeacon();
+        //start = findClosestBeacon();
+
+
+        //<test
+        start = 1;
+        //endtest>
+
+
         currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
         // Sets back button to return to previous screen
         btn_Back = findViewById(R.id.Cancel_Button);
@@ -78,15 +85,16 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             }
         });
         //ENTER NAVIGATION LOOP HERE SOMEHOW
+        /*
         while(!currentRoute.isEmpty()){
             LocationLinkedObj currentNode = beacons.get(currentRoute.peek());
             navText.setText(currentNode.DirectionsTo.get(currentRoute.get(1)));
-            /*need to set imageView here, potentially flip it*/
+            //need to set imageView here, potentially flip it
             recheckClosestBeacon();
         }
         if(currentRoute.isEmpty()){
             setContentView(R.layout.fragment_first);
-        }
+        }*/
 
     }
 
@@ -199,6 +207,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btScanner.stop();
     }
     public void recheckClosestBeacon(){
+        if(btDevicesArrayList.isEmpty()){
+            return;
+        }
         BTLE_Device closest = btDevicesArrayList.get(0);
         for (BTLE_Device btDev:btDevicesArrayList) {
             if(btDev.getRSSI() < closest.getRSSI()){

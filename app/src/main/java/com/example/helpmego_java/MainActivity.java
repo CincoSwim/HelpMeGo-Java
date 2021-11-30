@@ -43,11 +43,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         editText = findViewById(R.id.edit_text);
-        editText.setHint("Please input a destination.");
+        editText.setHint("");
         setSupportActionBar(toolbar);
         //fill spinner
         Spinner spinner = (Spinner) findViewById(R.id.spinner);
         List<String> rooms = new ArrayList<String>();
+        rooms.add("Pick a room number!");
         rooms.add("203");
         rooms.add("204");
         rooms.add("205");
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, rooms);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
+        spinner.setOnItemSelectedListener(this);
 
 
         //Load in static maps?
@@ -335,6 +337,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String item = parent.getItemAtPosition(position).toString();
+        if(item.equals("Pick a room number!")) return;
         dest = lookupIntByRoomNum(item, beacons);
         if(dest < 0) dest = 0;
 
