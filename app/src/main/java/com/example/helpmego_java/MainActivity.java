@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         tts.speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.", TextToSpeech.QUEUE_ADD, null, null);
-   
+
     }
 
 
@@ -312,8 +312,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         beacons.add(0, new LocationLinkedObj("1", 0));
         beacons.add(1, new LocationLinkedObj("2", 1));
-        beacons.add(2, new LocationLinkedObj("3", 2));
-        beacons.add(3, new LocationLinkedObj("4", 3));
+        beacons.add(2, new LocationLinkedObj("Beacon3", 2));
+        beacons.add(3, new LocationLinkedObj("Beacon4", 3));
         beacons.add(4, new LocationLinkedObj("5", 4));
         //set beacon 1 data
         beacons.get(0).addRoomID("203");
@@ -326,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //set beacon 3 data
         beacons.get(2).addRoomID("205");
         beacons.get(2).addDirection(1, "back");
+        beacons.get(2).addDirection(3, "right");
         beacons.get(2).addDirection(3, "right");
         //set beacon 4 data
         beacons.get(3).addRoomID("206");

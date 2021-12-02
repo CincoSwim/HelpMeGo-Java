@@ -11,9 +11,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 public class BluetoothDeviceList extends AppCompatActivity implements View.OnClickListener {
 
@@ -66,12 +64,11 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btn_Scan = findViewById(R.id.Help_About_Button);
         btn_Scan.setOnClickListener(this);
         //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
-        startScan();
         //start = findClosestBeacon();
 
 
         //<test
-        start = 1;
+        start = 2;
         //endtest>
 
 
@@ -85,6 +82,19 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             }
         });
         //ENTER NAVIGATION LOOP HERE SOMEHOW
+
+        LocationLinkedObj currentNode = beacons.get(currentRoute.removeLast());
+        while(!currentRoute.isEmpty()){
+            LocationLinkedObj nextNode = beacons.get(currentRoute.peekLast());
+            navText.setText(currentNode.DirectionsTo.get(nextNode.getUniqueInt()));
+            startScan();
+            if (btDevicesArrayList.size() > 0) {
+                if (btDevicesArrayList.get(0).getName().equalsIgnoreCase(nextNode.BeaconID)) {
+                    currentNode = beacons.get(currentRoute.removeLast());
+                }
+            }
+        }
+
         /*
         while(!currentRoute.isEmpty()){
             LocationLinkedObj currentNode = beacons.get(currentRoute.peek());
@@ -175,9 +185,16 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         else {
             btDevicesHashMap.get(address).setRSSI(rssi);
         }
-
         adapter.notifyDataSetChanged();
+        Collections.sort(btDevicesArrayList, new Comparator<BTLE_Device>(){
+            public int compare(BTLE_Device o1, BTLE_Device o2){
+                if(o1.getRSSI() == o2.getRSSI())
+                    return 0;
+                return o1.getRSSI() > o2.getRSSI() ? -1 : 1;
+            }
+        });
     }
+
 
     /**
      * Clears the ArrayList and Hashmap the ListAdapter is keeping track of.
