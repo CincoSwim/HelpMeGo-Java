@@ -84,7 +84,7 @@
             android:text="Button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" android:id="@+id/BTButton" app:layout_anchorGravity="top|center"
-            app:layout_anchor="@+id/button_second"/>
+            app:layout_anchor="@+id/button_second" android:visibility="gone"/>
 
     <!--android:onClick="HelpMeGo"-->
             <!--The value for this attribute

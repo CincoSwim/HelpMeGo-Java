@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static SpeechRecognizer speechRecog;
     int start = 1;
     int dest = 4;
-    ArrayList<ArrayList<Integer>> BTGraph;
+
     public static TextToSpeech tts;
 
     @Override
@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         //Implement TTS Here
-        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS){
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-        tts.speak("Welcome to HelpMeGo!", TextToSpeech.QUEUE_ADD, null, null);
+        speak("Welcome to HelpMeGo!");
 
 
         //pucko added here
@@ -193,8 +193,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         */
 
 
-
-
         Button mainButton = findViewById(R.id.button_first);
         mainButton.setOnClickListener(new View.OnClickListener(){
 
@@ -254,7 +252,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
 
 
-        tts.speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.", TextToSpeech.QUEUE_ADD, null, null);
+
+        speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.");
+   
 
     }
 
@@ -296,8 +296,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void speak(String text){
 
-        Log.d(TAG, "TTS Speak() called");
-        tts.speak(text, TextToSpeech.QUEUE_ADD, null, null);
+        Log.d(TAG, "TTS Speak() called - Speaking: " + text );
+        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
     }
 
     private void makeTestGraph(){

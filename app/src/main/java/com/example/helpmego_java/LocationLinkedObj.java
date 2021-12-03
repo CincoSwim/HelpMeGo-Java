@@ -2,8 +2,6 @@ package com.example.helpmego_java;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.Enumeration;
 import java.util.HashMap;
 
 public class LocationLinkedObj implements Serializable {
