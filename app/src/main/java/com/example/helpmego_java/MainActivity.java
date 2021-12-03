@@ -77,22 +77,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         //Implement TTS Here
-        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS){
-                    int result = tts.setLanguage(Locale.US);
-                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
-                        Log.e("TTS ERROR", "Lang not Supported");
 
-                    }else{
-                        Log.e("TTS ERROR", "Init failure");
-                    }
-                }
-            }
-        });
 
-        speak("Welcome to HelpMeGo!");
+
 
 
         //pucko added here
@@ -253,13 +240,37 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
 
-        speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.");
+        //speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.");
    
 
     }
 
 
+    @Override
+    protected void onStart(){
+        super.onStart();
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS){
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
+                        Log.e("TTS ERROR", "Lang not Supported");
 
+                    }else{
+                        tts.speak("Welcome to Help Me Go", TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
+                }
+            }
+        });
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        speak("Main Menu");
+
+    }
     private void startListen(View view){
         //do something
     }
@@ -294,7 +305,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
 
-    private void speak(String text){
+    public static void speak(String text){
 
         Log.d(TAG, "TTS Speak() called - Speaking: " + text );
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);

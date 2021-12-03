@@ -24,6 +24,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private HashMap<String, BTLE_Device> btDevicesHashMap;
     private ArrayList<BTLE_Device> btDevicesArrayList;
     private ArrayList<LocationLinkedObj> beacons;
+    private LinkedList<Integer> currentRoute;
 
     private ListAdapter_BTLE adapter;
 
@@ -105,8 +106,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-
+        MainActivity.speak("Now navigating....");
         currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
+
         // Sets back button to return to previous screen
         /*
         btn_Back = findViewById(R.id.backButton);
