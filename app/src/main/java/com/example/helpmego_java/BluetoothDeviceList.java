@@ -3,7 +3,11 @@ package com.example.helpmego_java;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
@@ -11,9 +15,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 
 public class BluetoothDeviceList extends AppCompatActivity implements View.OnClickListener {
 
@@ -36,7 +38,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_second);
-        TextView navText = (TextView) findViewById(R.id.Text_Directions);
+
 
 
 
@@ -65,26 +67,23 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
         btn_Scan = findViewById(R.id.Help_About_Button);
         btn_Scan.setOnClickListener(this);
+        btn_Back = findViewById(R.id.Cancel_Button);
+        btn_Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
-        startScan();
         //start = findClosestBeacon();
 
 
         //<test
-        start = 1;
+        start = 0;
         //endtest>
 
 
-        MainActivity.currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
-        // Sets back button to return to previous screen
-        btn_Back = findViewById(R.id.Cancel_Button);
-        btn_Back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-        //ENTER NAVIGATION LOOP HERE SOMEHOW
+
         /*
         while(!currentRoute.isEmpty()){
             LocationLinkedObj currentNode = beacons.get(currentRoute.peek());
@@ -106,6 +105,69 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
+
+        currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
+        // Sets back button to return to previous screen
+        /*
+        btn_Back = findViewById(R.id.backButton);
+        btn_Back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+         */
+
+        //ENTER NAVIGATION LOOP HERE SOMEHOW
+        final TextView navText = (TextView) findViewById(R.id.Text_Directions);
+
+        Runnable btScanRunnable = new Runnable() {
+            @Override
+            public void run() {
+                LocationLinkedObj currentNode = beacons.get(currentRoute.removeLast());
+                while(!currentRoute.isEmpty()){
+
+                    LocationLinkedObj nextNode = beacons.get(currentRoute.peekLast());
+                    final String navUpdate = currentNode.DirectionsTo.get(nextNode.getUniqueInt());
+                    navText.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            navText.setText(navUpdate);
+                        }
+                    });
+                    //startScan();
+
+                    if (!btScanner.isScanning()) {
+                        startScan();
+                        Utility_Func.delay(1, new Utility_Func.DelayCallback() {
+                            @Override
+                            public void afterDelay() {
+                                System.out.println("testprint");
+                                stopScan();
+                                System.out.println("afterStopScan");
+                            }
+                        });
+
+                    }
+
+                    if (btDevicesArrayList.size() > 0) {
+                        String vibeCheck = btDevicesArrayList.get(0).getAddress();
+                        String feelsCheck = btDevicesArrayList.get(0).getName();
+                        BTLE_Device first = btDevicesArrayList.get(0);
+                        feelsCheck = first.getName();
+
+
+                        if (btDevicesArrayList.get(0).getName().equalsIgnoreCase(nextNode.BeaconID)) {
+                            currentNode = beacons.get(currentRoute.removeLast());
+                        }
+                    }
+                }
+            }
+        };
+
+        Thread myThread = new Thread(btScanRunnable);
+        myThread.start();
+
     }
 
     @Override
@@ -151,11 +213,20 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
             if (!btScanner.isScanning()) {
                 startScan();
+                Utility_Func.delay(5, new Utility_Func.DelayCallback() {
+                    @Override
+                    public void afterDelay() {
+                        stopScan();
+                    }
+                });
+
             } else {
                 stopScan();
             }
         }
     }
+
+
 
     /**
      * Adds a device to the arraylist and hashmap
@@ -170,14 +241,24 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             btleDevice.setRSSI(rssi);
 
             btDevicesHashMap.put(address, btleDevice);
-            btDevicesArrayList.add(btleDevice);
+
+            if(btleDevice.getName() != null){
+                btDevicesArrayList.add(btleDevice);
+            }
         }
         else {
             btDevicesHashMap.get(address).setRSSI(rssi);
         }
-
         adapter.notifyDataSetChanged();
+        Collections.sort(btDevicesArrayList, new Comparator<BTLE_Device>(){
+            public int compare(BTLE_Device o1, BTLE_Device o2){
+                if(o1.getRSSI() == o2.getRSSI())
+                    return 0;
+                return o1.getRSSI() > o2.getRSSI() ? -1 : 1;
+            }
+        });
     }
+
 
     /**
      * Clears the ArrayList and Hashmap the ListAdapter is keeping track of.
@@ -185,7 +266,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
      * Changes the scan button text.
      */
     public void startScan(){
-        btn_Scan.setText("Scanning...");
+        //btn_Scan.setText("Scanning...");
 
         btDevicesArrayList.clear();
         btDevicesHashMap.clear();
@@ -200,7 +281,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
      * Changes the scan button text.
      */
     public void stopScan() {
-        btn_Scan.setText("Scan Again");
+        //btn_Scan.setText("Scan Again");
 
         //get closest beacon
 
