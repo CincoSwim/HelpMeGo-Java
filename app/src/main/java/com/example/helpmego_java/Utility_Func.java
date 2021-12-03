@@ -4,10 +4,26 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.widget.Toast;
 
 public class Utility_Func {
+
+    public interface DelayCallback{
+        void afterDelay();
+    }
+
+    public static void delay(int secs, final DelayCallback delayCallback){
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                delayCallback.afterDelay();
+            }
+        }, secs * 1000); // afterDelay will be executed after (secs*1000) milliseconds.
+    }
 
     public static boolean checkBluetooth(BluetoothAdapter bluetoothAdapter) {
 
@@ -31,4 +47,5 @@ public class Utility_Func {
         toast.setGravity(Gravity.CENTER | Gravity.BOTTOM, 0, 0);
         toast.show();
     }
+
 }

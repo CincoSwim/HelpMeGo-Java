@@ -5,7 +5,9 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 
@@ -59,13 +61,13 @@ public class Scanner_BTLE {
         final BluetoothLeScanner bluetoothLeScanner = btadap.getBluetoothLeScanner();
 
         if (enable && !scanning) {
-            Utility_Func.toast(btdl.getApplicationContext(), "Starting BLE scan...");
+            //Utility_Func.toast(btdl.getApplicationContext(), "Starting BLE scan...");
 
             // Stops scanning after a pre-defined scan period.
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Utility_Func.toast(btdl.getApplicationContext(), "Stopping BLE scan...");
+                    //Utility_Func.toast(btdl.getApplicationContext(), "Stopping BLE scan...");
 
                     scanning = false;
                     bluetoothLeScanner.stopScan(mLeScanCallback);
@@ -93,7 +95,9 @@ public class Scanner_BTLE {
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        btdl.addDevice(result.getDevice(), new_rssi);
+
+                           btdl.addDevice(result.getDevice(), new_rssi);
+
                     }
                 });
             }

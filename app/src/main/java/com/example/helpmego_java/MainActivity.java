@@ -202,13 +202,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(View v) {
                 String parsedRoom;
                 promptSpeechInput(); //this continues before getting the STT input!
+                STT_STRING = STT_STRING.toLowerCase(Locale.ROOT);
                 int lastindex = STT_STRING.lastIndexOf("room");
                 if(lastindex == -1){
                     parsedRoom = "heard nothing!";
                     Log.e(TAG, "no room parsed - check voice input");
                     Toast.makeText(getApplicationContext(), "nothing heard", Toast.LENGTH_SHORT).show();
                 }else{
-                    parsedRoom = STT_STRING.substring(lastindex);
+                    parsedRoom = STT_STRING.substring(lastindex+5);
                     dest = lookupIntByRoomNum(parsedRoom, beacons);
                     if(dest == 99) dest = 0;
                     Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
@@ -306,37 +307,37 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         PathGraph.addEdge(floorGraph, 1, 2);
         PathGraph.addEdge(floorGraph, 2, 3);
         PathGraph.addEdge(floorGraph, 3, 4);
-        PathGraph.addEdge(floorGraph, 4, 1);
+        //PathGraph.addEdge(floorGraph, 4, 1);
         Log.d(TAG, "graph filled");
         Log.d(TAG, "filling LocationLinkedObjs");
 
-        beacons.add(0, new LocationLinkedObj("1", 0));
-        beacons.add(1, new LocationLinkedObj("2", 1));
+        beacons.add(0, new LocationLinkedObj("Beacon1", 0));
+        beacons.add(1, new LocationLinkedObj("Beacon2", 1));
         beacons.add(2, new LocationLinkedObj("Beacon3", 2));
         beacons.add(3, new LocationLinkedObj("Beacon4", 3));
         beacons.add(4, new LocationLinkedObj("5", 4));
         //set beacon 1 data
         beacons.get(0).addRoomID("203");
         beacons.get(0).addRoomID("204");
-        beacons.get(0).addDirection(1, "forward");
+        beacons.get(0).addDirection(1, "forward to b2");
         //set beacon 2 data
-        beacons.get(1).addDirection(0, "back");
-        beacons.get(1).addDirection(2, "forward");
-        beacons.get(1).addDirection(4, "right");
+        beacons.get(1).addDirection(0, "back to b1");
+        beacons.get(1).addDirection(2, "forward to b3");
+       // beacons.get(1).addDirection(4, "right");
         //set beacon 3 data
         beacons.get(2).addRoomID("205");
-        beacons.get(2).addDirection(1, "back");
-        beacons.get(2).addDirection(3, "right");
-        beacons.get(2).addDirection(3, "right");
+        beacons.get(2).addDirection(1, "back to b2");
+        beacons.get(2).addDirection(3, "right tp b4");
+        //beacons.get(2).addDirection(3, "right");
         //set beacon 4 data
         beacons.get(3).addRoomID("206");
-        beacons.get(3).addDirection(2, "left");
-        beacons.get(3).addDirection(4, "back");
+        beacons.get(3).addDirection(2, "left to b3");
+        beacons.get(3).addDirection(4, "back to b5");
         //set beacon 5 data
         beacons.get(4).addRoomID("207");
         beacons.get(4).addRoomID("208");
-        beacons.get(4).addDirection(3, "forward");
-        beacons.get(4).addDirection(1, "left");
+        beacons.get(4).addDirection(3, "forward to b4");
+       // beacons.get(4).addDirection(1, "left");
         Log.d(TAG, "list of LocationLinkedObjs (beacons) filled");
     };
     public static int lookupIntByBeaconID(String BUID, ArrayList<LocationLinkedObj> bList){
