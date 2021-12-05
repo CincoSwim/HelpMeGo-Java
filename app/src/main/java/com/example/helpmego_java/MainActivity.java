@@ -36,7 +36,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Spinner spinner;
     List<String> rooms;
     protected static String STT_STRING = "";
-    private static SpeechRecognizer speechRecog;
     int start = 1;
     int dest = 4;
 
@@ -77,22 +76,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
         //Implement TTS Here
-        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS){
-                    int result = tts.setLanguage(Locale.US);
-                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
-                        Log.e("TTS ERROR", "Lang not Supported");
 
-                    }else{
-                        Log.e("TTS ERROR", "Init failure");
-                    }
-                }
-            }
-        });
 
-        speak("Welcome to HelpMeGo!");
+
 
 
         //pucko added here
@@ -251,17 +237,33 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
-
-        speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.");
-   
-
     }
 
 
 
-    private void startListen(View view){
-        //do something
+    @Override
+    protected void onStart(){
+        super.onStart();
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS){
+                    int result = tts.setLanguage(Locale.US);
+                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
+                        Log.e("TTS ERROR", "Lang not Supported");
+
+                    }else{
+                        tts.speak("Welcome to Help Me Go.", TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
+                }
+            }
+        });
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        speak("Main Menu");
     }
 
     private void checkPermission(){
@@ -294,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
 
-    private void speak(String text){
+    public static void speak(String text){
 
         Log.d(TAG, "TTS Speak() called - Speaking: " + text );
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
@@ -319,24 +321,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //set beacon 1 data
         beacons.get(0).addRoomID("203");
         beacons.get(0).addRoomID("204");
-        beacons.get(0).addDirection(1, "forward to b2");
+        beacons.get(0).addDirection(1, "forward to Beacon 2");
         //set beacon 2 data
-        beacons.get(1).addDirection(0, "back to b1");
-        beacons.get(1).addDirection(2, "forward to b3");
+        beacons.get(1).addDirection(0, "back to Beacon 1");
+        beacons.get(1).addDirection(2, "forward to Beacon 3");
        // beacons.get(1).addDirection(4, "right");
         //set beacon 3 data
         beacons.get(2).addRoomID("205");
-        beacons.get(2).addDirection(1, "back to b2");
-        beacons.get(2).addDirection(3, "right tp b4");
+        beacons.get(2).addDirection(1, "back to Beacon 2");
+        beacons.get(2).addDirection(3, "right to Beacon 4");
         //beacons.get(2).addDirection(3, "right");
         //set beacon 4 data
         beacons.get(3).addRoomID("206");
-        beacons.get(3).addDirection(2, "left to b3");
-        beacons.get(3).addDirection(4, "back to b5");
+        beacons.get(3).addDirection(2, "left to Beacon 3");
+        beacons.get(3).addDirection(4, "back to Beacon 5");
         //set beacon 5 data
         beacons.get(4).addRoomID("207");
         beacons.get(4).addRoomID("208");
-        beacons.get(4).addDirection(3, "forward to b4");
+        beacons.get(4).addDirection(3, "forward to Beacon 4");
        // beacons.get(4).addDirection(1, "left");
         Log.d(TAG, "list of LocationLinkedObjs (beacons) filled");
     };
