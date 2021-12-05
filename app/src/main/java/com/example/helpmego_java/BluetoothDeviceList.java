@@ -9,10 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.*;
@@ -124,15 +121,26 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
         //ENTER NAVIGATION LOOP HERE SOMEHOW
         final TextView navText = (TextView) findViewById(R.id.Text_Directions);
-
+        final ImageView imgView = (ImageView) findViewById(R.id.imageView);
         Runnable btScanRunnable = new Runnable() {
             @Override
             public void run() {
+
                 LocationLinkedObj currentNode = beacons.get(currentRoute.removeLast());
+
                 while(!currentRoute.isEmpty()){
 
                     LocationLinkedObj nextNode = beacons.get(currentRoute.peekLast());
                     final String navUpdate = currentNode.DirectionsTo.get(nextNode.getUniqueInt());
+                    final String parsedDirection = extractDirection(navUpdate);
+                    imgView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            String mDrawableName = parsedDirection;
+                            int resID = getResources().getIdentifier(mDrawableName, "drawable", getPackageName());
+                            imgView.setImageResource(resID);
+                        }
+                    });
                     navText.post(new Runnable() {
                         @Override
                         public void run() {
@@ -172,6 +180,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
                             currentNode = beacons.get(currentRoute.removeLast());
                             nextNode = beacons.get(currentRoute.peekLast());
                             MainActivity.speak("Go " + currentNode.DirectionsTo.get(nextNode.getUniqueInt()));
+
                         }
                     }
                 }
@@ -324,5 +333,10 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         }
         int closestNode = MainActivity.lookupIntByBeaconID(closest.getName(), beacons);
         return closestNode;
+    }
+
+    private String extractDirection(String input){
+        int i = input.indexOf(' ');
+        return input.substring(0,i);
     }
 }
