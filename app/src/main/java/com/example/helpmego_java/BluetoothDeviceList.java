@@ -48,7 +48,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             finish();
         }
 
-        btScanner = new Scanner_BTLE(this, 7500, -75);
+        btScanner = new Scanner_BTLE(this, 1000, -75);
 
         btDevicesHashMap = new HashMap<>();
         btDevicesArrayList = new ArrayList<>();
@@ -71,7 +71,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btn_Back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //need to end thread nicely here.
+                //need to end thread nicely here
                 finish();
             }
         });
@@ -84,18 +84,6 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         //endtest>
 
 
-
-        /*
-        while(!currentRoute.isEmpty()){
-            LocationLinkedObj currentNode = beacons.get(currentRoute.peek());
-            navText.setText(currentNode.DirectionsTo.get(currentRoute.get(1)));
-            //need to set imageView here, potentially flip it
-            recheckClosestBeacon();
-        }
-        if(currentRoute.isEmpty()){
-            setContentView(R.layout.fragment_first);
-        }*/
-
     }
 
     @Override
@@ -106,18 +94,27 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        MainActivity.speak("Now Navigating.");
-        currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
-        // Sets back button to return to previous screen
-        /*
-        btn_Back = findViewById(R.id.backButton);
-        btn_Back.setOnClickListener(new View.OnClickListener() {
+        MainActivity.speak("Now Navigating.");/*
+        Runnable firstScanRunnable = new Runnable() {
             @Override
-            public void onClick(View view) {
-                finish();
+            public void run() {
+
+                if(btDevicesArrayList.size() > 0){
+                    return;
+                }
             }
-        });
-         */
+        };
+
+        myThread = new Thread(firstScanRunnable);
+        myThread.start();
+        try {
+            myThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+
+        //currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,1, dest, 5 );
 
         //ENTER NAVIGATION LOOP HERE SOMEHOW
         final TextView navText = (TextView) findViewById(R.id.Text_Directions);
@@ -125,9 +122,29 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         Runnable btScanRunnable = new Runnable() {
             @Override
             public void run() {
+                do{
+                    if (!btScanner.isScanning()) {
+                        startScan();
 
+                        try {
+                            Thread.sleep(3000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        stopScan();
+
+                    }
+
+                }while(btDevicesArrayList.isEmpty());
+                start =MainActivity.lookupIntByBeaconID(btDevicesArrayList.get(0).getName(), beacons);
+                if(beacons.get(start) != null){
+                    currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
+                }else{
+                    currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,1, dest, 5 );
+                }
                 LocationLinkedObj currentNode = beacons.get(currentRoute.removeLast());
-
+                LocationLinkedObj speakNext = beacons.get(currentRoute.peekLast());
+                MainActivity.speak("Go " + currentNode.DirectionsTo.get(speakNext.getUniqueInt()));
                 while(!currentRoute.isEmpty()){
 
                     LocationLinkedObj nextNode = beacons.get(currentRoute.peekLast());
@@ -151,14 +168,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
                     if (!btScanner.isScanning()) {
                         startScan();
-                        /*Utility_Func.delay(1, new Utility_Func.DelayCallback() {
-                            @Override
-                            public void afterDelay() {
-                                System.out.println("testprint");
-                                stopScan();
-                                System.out.println("afterStopScan");
-                            }
-                        });*/
+
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
