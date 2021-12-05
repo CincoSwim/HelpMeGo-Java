@@ -31,7 +31,7 @@
             android:padding="10dp"
             android:prompt="@string/Where_would_you_like_to_go"
             android:id="@+id/spinner" app:layout_anchor="@+id/spinner"
-            android:layout_height="44dp" android:layout_width="391dp"/>
+            android:layout_height="44dp" android:layout_width="376dp"/>
     <Button
             android:id="@+id/button_first"
             android:layout_width="373dp"
