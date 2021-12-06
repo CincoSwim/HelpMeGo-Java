@@ -21,7 +21,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private HashMap<String, BTLE_Device> btDevicesHashMap;
     private ArrayList<BTLE_Device> btDevicesArrayList;
     private ArrayList<LocationLinkedObj> beacons;
-    private LinkedList<Integer> currentRoute;
+    
 
     private ListAdapter_BTLE adapter;
     private static LinkedList<Integer> currentRoute;
