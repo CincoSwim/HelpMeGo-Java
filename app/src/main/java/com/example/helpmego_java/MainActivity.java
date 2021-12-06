@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         }
         makeTestGraph();
 
+
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
             checkPermission();
         }
@@ -193,6 +194,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
 
+
+
     @Override
     protected void onStart(){
         super.onStart();
@@ -203,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     int result = tts.setLanguage(Locale.US);
                     if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
                         Log.e("TTS ERROR", "Lang not Supported");
+
 
                     }else{
                         tts.speak("Welcome to Help Me Go. To start, press the button in the center of the screen, and speak where you'd like to go.", TextToSpeech.QUEUE_FLUSH, null, null);
@@ -216,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onResume(){
         super.onResume();
         //speak("Main Menu");
+
     }
 
     private void checkPermission(){

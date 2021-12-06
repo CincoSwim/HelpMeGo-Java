@@ -22,6 +22,8 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
+
+
     <Spinner
 
             android:layout_marginRight="15dp"
@@ -35,7 +37,7 @@
     <Button
             android:id="@+id/button_first"
             android:layout_width="373dp"
-            android:layout_height="476dp"
+            android:layout_height="424dp"
             android:layout_gravity="center"
             android:text="@string/HelpMeGo"
             android:textColor="@android:color/white"
@@ -57,11 +59,11 @@
 
     <Button
             android:id="@id/button_second"
-            android:layout_width="373dp"
-            android:layout_height="68dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="20dp"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="630dp"
+            android:layout_marginTop="560dp"
             android:text="@string/Help_and_About"
             android:textAllCaps="false"
 
