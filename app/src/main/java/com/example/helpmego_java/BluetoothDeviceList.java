@@ -9,10 +9,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.*;
@@ -27,9 +24,13 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private LinkedList<Integer> currentRoute;
 
     private ListAdapter_BTLE adapter;
+    private static LinkedList<Integer> currentRoute;
+    private String room;
 
     private Button btn_Scan;
     private Button btn_Back;
+
+    private Thread myThread;
 
     private Scanner_BTLE btScanner;
     int dest;
@@ -49,7 +50,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             finish();
         }
 
-        btScanner = new Scanner_BTLE(this, 7500, -75);
+        btScanner = new Scanner_BTLE(this, 1000, -75);
 
         btDevicesHashMap = new HashMap<>();
         btDevicesArrayList = new ArrayList<>();
@@ -59,6 +60,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             dest = 4;
         }else{
             dest = extras.getInt("dest");
+            room = extras.getString("room");
         }
 
         adapter = new ListAdapter_BTLE(this, R.layout.btle_device_list, btDevicesArrayList);
@@ -72,29 +74,18 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         btn_Back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //need to end thread nicely here
+                MainActivity.speak("Main Menu");
                 finish();
             }
         });
-        //((ScrollView) findViewById(R.id.scrollView)).addView(listView);
-        //start = findClosestBeacon();
+
 
 
         //<test
         start = 0;
-        //endtest>
+        //endtest
 
-
-
-        /*
-        while(!currentRoute.isEmpty()){
-            LocationLinkedObj currentNode = beacons.get(currentRoute.peek());
-            navText.setText(currentNode.DirectionsTo.get(currentRoute.get(1)));
-            //need to set imageView here, potentially flip it
-            recheckClosestBeacon();
-        }
-        if(currentRoute.isEmpty()){
-            setContentView(R.layout.fragment_first);
-        }*/
 
     }
 
@@ -106,68 +97,89 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-        MainActivity.speak("Now navigating....");
-        currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
 
-        // Sets back button to return to previous screen
-        /*
-        btn_Back = findViewById(R.id.backButton);
-        btn_Back.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
-         */
+        MainActivity.speak("Now Navigating to room" + room);
 
-        //ENTER NAVIGATION LOOP HERE SOMEHOW
+
         final TextView navText = (TextView) findViewById(R.id.Text_Directions);
-
+        final ImageView imgView = (ImageView) findViewById(R.id.imageView);
         Runnable btScanRunnable = new Runnable() {
             @Override
             public void run() {
+                do{
+                    if (!btScanner.isScanning()) {
+                        startScan();
+
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        stopScan();
+
+                    }
+
+                }while(btDevicesArrayList.isEmpty());
+                start =MainActivity.lookupIntByBeaconID(btDevicesArrayList.get(0).getName(), beacons);
+                if(beacons.get(start) != null){
+                    currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
+                }else{
+                    currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,1, dest, 5 );
+                }
                 LocationLinkedObj currentNode = beacons.get(currentRoute.removeLast());
+                LocationLinkedObj speakNext = beacons.get(currentRoute.peekLast());
+                MainActivity.speak("Go " + currentNode.DirectionsTo.get(speakNext.getUniqueInt()));
                 while(!currentRoute.isEmpty()){
 
                     LocationLinkedObj nextNode = beacons.get(currentRoute.peekLast());
                     final String navUpdate = currentNode.DirectionsTo.get(nextNode.getUniqueInt());
+                    final String parsedDirection = extractDirection(navUpdate);
+                    imgView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            String mDrawableName = parsedDirection;
+                            int resID = getResources().getIdentifier(mDrawableName, "drawable", getPackageName());
+                            imgView.setImageResource(resID);
+                        }
+                    });
                     navText.post(new Runnable() {
                         @Override
                         public void run() {
-                            navText.setText(navUpdate);
+                            navText.setText("Go " + navUpdate);
                         }
                     });
-                    //startScan();
+
 
                     if (!btScanner.isScanning()) {
                         startScan();
-                        Utility_Func.delay(1, new Utility_Func.DelayCallback() {
-                            @Override
-                            public void afterDelay() {
-                                System.out.println("testprint");
-                                stopScan();
-                                System.out.println("afterStopScan");
-                            }
-                        });
+
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        stopScan();
+
 
                     }
 
                     if (btDevicesArrayList.size() > 0) {
-                        String vibeCheck = btDevicesArrayList.get(0).getAddress();
-                        String feelsCheck = btDevicesArrayList.get(0).getName();
-                        BTLE_Device first = btDevicesArrayList.get(0);
-                        feelsCheck = first.getName();
-
 
                         if (btDevicesArrayList.get(0).getName().equalsIgnoreCase(nextNode.BeaconID)) {
                             currentNode = beacons.get(currentRoute.removeLast());
+                            nextNode = beacons.get(currentRoute.peekLast());
+                            MainActivity.speak("Go " + currentNode.DirectionsTo.get(nextNode.getUniqueInt()));
+
                         }
                     }
                 }
+                MainActivity.speak("You have arrived.");
+
+                return;
             }
         };
 
-        Thread myThread = new Thread(btScanRunnable);
+        myThread = new Thread(btScanRunnable);
         myThread.start();
 
     }
@@ -313,5 +325,10 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         }
         int closestNode = MainActivity.lookupIntByBeaconID(closest.getName(), beacons);
         return closestNode;
+    }
+
+    private String extractDirection(String input){
+        int i = input.indexOf(' ');
+        return input.substring(0,i);
     }
 }

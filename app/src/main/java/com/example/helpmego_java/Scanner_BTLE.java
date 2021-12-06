@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.bluetooth.le.ScanSettings;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ public class Scanner_BTLE {
     private BluetoothAdapter btadap;
     private boolean scanning;
     private Handler mHandler;
+    ScanSettings settings;
 
     private long scanPeriod;
     private int signalStrength;
@@ -77,7 +79,10 @@ public class Scanner_BTLE {
             }, scanPeriod);
 
             scanning = true;
-            bluetoothLeScanner.startScan(mLeScanCallback);
+            ScanSettings.Builder settingBuilder = new ScanSettings.Builder();
+            settingBuilder.setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY);
+            settings = settingBuilder.build();
+            bluetoothLeScanner.startScan(null, settings, mLeScanCallback);
         } else {
             scanning = false;
             bluetoothLeScanner.stopScan(mLeScanCallback);

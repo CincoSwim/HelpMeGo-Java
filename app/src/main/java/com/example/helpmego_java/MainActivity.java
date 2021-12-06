@@ -32,11 +32,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
     protected static ArrayList<LocationLinkedObj> beacons = new ArrayList<LocationLinkedObj>(); //there's gotta be a cleaner way for this
     protected static LinkedList<Integer> currentRoute;
-    private EditText editText;
     private Spinner spinner;
     List<String> rooms;
     protected static String STT_STRING = "";
-    private static SpeechRecognizer speechRecog;
     int start = 1;
     int dest = 4;
 
@@ -47,8 +45,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
-        editText = findViewById(R.id.edit_text);
-        editText.setHint("");
+
         setSupportActionBar(toolbar);
         //fill spinner
         spinner = (Spinner) findViewById(R.id.spinner);
@@ -73,16 +70,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         makeTestGraph();
 
 
-        //end load of static maps
-
-
-        //Implement TTS Here
-
-
-
-
-
-        //pucko added here
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
             checkPermission();
         }
@@ -187,45 +174,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             public void onClick(View v) {
                 String parsedRoom;
                 promptSpeechInput(); //this continues before getting the STT input!
-                STT_STRING = STT_STRING.toLowerCase(Locale.ROOT);
-                int lastindex = STT_STRING.lastIndexOf("room");
-                if(lastindex == -1){
-                    parsedRoom = "heard nothing!";
-                    Log.e(TAG, "no room parsed - check voice input");
-                    Toast.makeText(getApplicationContext(), "nothing heard", Toast.LENGTH_SHORT).show();
-                }else{
-                    parsedRoom = STT_STRING.substring(lastindex+5);
-                    dest = lookupIntByRoomNum(parsedRoom, beacons);
-                    if(dest == 99) dest = 0;
-                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
 
-                    intent.putExtra("dest", dest);
-                    Log.d(TAG, "intent filled, moving to activity");
-                    startActivity(intent);
-                }
             }
         });
-        /* remove comment to go back to prior voice input implementation
-        mainButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_UP){
-                    Log.d(TAG, "mainButton sees UP");
-                    speechRecog.stopListening();
-                    Log.d(TAG, "stopped listening");
-                }if(event.getAction() == MotionEvent.ACTION_DOWN){
 
-                    Log.d(TAG, "mainButton sees DOWN");
-                    tts.speak("Now Listening.", TextToSpeech.QUEUE_ADD, null, null);
-
-
-                    speechRecog.startListening(speechRecognizerIntent);
-                    Log.d(TAG, "started listening");
-                }
-                return false;
-            }
-
-        }); */
 
         // Added button to goto bluetooth device screen for testing
         Button toBTDevices = (Button) findViewById(R.id.BTButton);
@@ -238,12 +190,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
-
-        //speak("Welcome to Help Me Go. To begin, please press the button in the center of the screen, and ask for directions to a room.");
-   
-
     }
+
+
+
 
 
     @Override
@@ -257,22 +207,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
                         Log.e("TTS ERROR", "Lang not Supported");
 
+
                     }else{
-                        tts.speak("Welcome to Help Me Go", TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak("Welcome to Help Me Go. To start, press the button in the center of the screen, and speak where you'd like to go.", TextToSpeech.QUEUE_FLUSH, null, null);
                     }
                 }
             }
         });
-
     }
+
     @Override
-    protected void onResume() {
+    protected void onResume(){
         super.onResume();
-        speak("Main Menu");
+        //speak("Main Menu");
 
-    }
-    private void startListen(View view){
-        //do something
     }
 
     private void checkPermission(){
@@ -330,24 +278,24 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         //set beacon 1 data
         beacons.get(0).addRoomID("203");
         beacons.get(0).addRoomID("204");
-        beacons.get(0).addDirection(1, "forward to b2");
+        beacons.get(0).addDirection(1, "forward to Beacon 2");
         //set beacon 2 data
-        beacons.get(1).addDirection(0, "back to b1");
-        beacons.get(1).addDirection(2, "forward to b3");
+        beacons.get(1).addDirection(0, "back to Beacon 1");
+        beacons.get(1).addDirection(2, "forward to Beacon 3");
        // beacons.get(1).addDirection(4, "right");
         //set beacon 3 data
         beacons.get(2).addRoomID("205");
-        beacons.get(2).addDirection(1, "back to b2");
-        beacons.get(2).addDirection(3, "right tp b4");
+        beacons.get(2).addDirection(1, "back to Beacon 2");
+        beacons.get(2).addDirection(3, "right to Beacon 4");
         //beacons.get(2).addDirection(3, "right");
         //set beacon 4 data
         beacons.get(3).addRoomID("206");
-        beacons.get(3).addDirection(2, "left to b3");
-        beacons.get(3).addDirection(4, "back to b5");
+        beacons.get(3).addDirection(2, "left to Beacon 3");
+        beacons.get(3).addDirection(4, "back to Beacon 5");
         //set beacon 5 data
         beacons.get(4).addRoomID("207");
         beacons.get(4).addRoomID("208");
-        beacons.get(4).addDirection(3, "forward to b4");
+        beacons.get(4).addDirection(3, "forward to Beacon 4");
        // beacons.get(4).addDirection(1, "left");
         Log.d(TAG, "list of LocationLinkedObjs (beacons) filled");
     };
@@ -392,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
 
         intent.putExtra("dest", dest);
+        intent.putExtra("room", item);
         Log.d(TAG, "intent filled, moving to activity");
         startActivity(intent);
     }
@@ -435,6 +384,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
 
                         intent.putExtra("dest", dest);
+                        intent.putExtra("room", parsedRoom);
                         Log.d(TAG, "intent filled, moving to activity");
                         STT_STRING = "";
                         startActivity(intent);
