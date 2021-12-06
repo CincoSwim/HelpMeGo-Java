@@ -76,6 +76,8 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             public void onClick(View v) {
                 //need to end thread nicely here
                 MainActivity.speak("Main Menu");
+                if (myThread.isAlive()){
+                    myThread.interrupt();}
                 finish();
             }
         });
@@ -174,7 +176,16 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
                     }
                 }
                 MainActivity.speak("You have arrived.");
-
+                setContentView(R.layout.fragment_first);
+                Button returnBTN = findViewById(R.id.return_btn);
+                returnBTN.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        if (myThread.isAlive()){
+                            myThread.interrupt();}
+                        finish();
+                    }
+                });
                 return;
             }
         };
