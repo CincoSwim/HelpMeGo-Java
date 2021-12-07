@@ -11,7 +11,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-
+/**
+ * Class used to implement scanning capabilities for Bluetooth LE and make them available as more abstract calls
+ * This class is what initializes the BT Radio directly.
+ * */
 public class Scanner_BTLE {
 
     private BluetoothDeviceList btdl;

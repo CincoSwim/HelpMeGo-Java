@@ -3,7 +3,6 @@ package com.example.helpmego_java;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.nfc.Tag;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,7 +12,11 @@ import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.*;
-
+/**
+ * Activity Class that describes the Navigational screen for the application.
+ * When a user begins navigation, they will be presented with this screen.
+ * This class is the primary user of Bluetooth functionality for navigation
+ * */
 public class BluetoothDeviceList extends AppCompatActivity implements View.OnClickListener {
 
     public static final int REQUEST_ENABLE_BT = 1;
@@ -21,7 +24,6 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private HashMap<String, BTLE_Device> btDevicesHashMap;
     private ArrayList<BTLE_Device> btDevicesArrayList;
     private ArrayList<LocationLinkedObj> beacons;
-    
 
     private ListAdapter_BTLE adapter;
     private static LinkedList<Integer> currentRoute;
@@ -33,28 +35,27 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     private Thread myThread;
 
     private Scanner_BTLE btScanner;
-    int dest;
-    int start = 1;
+    int dest = 0;
+    int start = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_second);
 
-
-
-
         // Checks if BLE is supported on device
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Utility_Func.toast(getApplicationContext(), "BLE not supported");
             finish();
         }
-
+        //Create BLE scanner object - this is used to invoke BT radio through Android
         btScanner = new Scanner_BTLE(this, 1000, -75);
 
         btDevicesHashMap = new HashMap<>();
         btDevicesArrayList = new ArrayList<>();
         beacons = MainActivity.beacons;
+        //Get room number and associated beacon ID from previous MainActivity.
+        //If empty, destination is set to 4 so that dest and start are not equal.
         Bundle extras = getIntent().getExtras();
         if(extras == null){
             dest = 4;
@@ -62,33 +63,25 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
             dest = extras.getInt("dest");
             room = extras.getString("room");
         }
-
+        //Debug stubs for list of beacons
         adapter = new ListAdapter_BTLE(this, R.layout.btle_device_list, btDevicesArrayList);
-
         ListView listView = new ListView(this);
         listView.setAdapter(adapter);
 
+        //Set functionality for this view's buttons
         btn_Scan = findViewById(R.id.Help_About_Button);
         btn_Scan.setOnClickListener(this);
         btn_Back = findViewById(R.id.Cancel_Button);
         btn_Back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //need to end thread nicely here
+                //end NavLogic thread nicely here
                 MainActivity.speak("Main Menu");
                 if (myThread.isAlive()){
                     myThread.interrupt();}
                 finish();
             }
         });
-
-
-
-        //<test
-        start = 0;
-        //endtest
-
-
     }
 
     @Override
@@ -99,15 +92,20 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     protected void onResume() {
         super.onResume();
-
+        //Vocalize what room was recognized as the destination
         MainActivity.speak("Now Navigating to room" + room);
-
 
         final TextView navText = (TextView) findViewById(R.id.Text_Directions);
         final ImageView imgView = (ImageView) findViewById(R.id.imageView);
+        /**
+        * This defines the Navigational thread logic to be run by the thread "myThread"
+         * Navigational logic is run in a concurrent thread to prevent while loops from
+         * stalling the primary thread and preventing the drawing of UI elements
+        * */
         Runnable btScanRunnable = new Runnable() {
             @Override
             public void run() {
+                //Run the BT scanner in 2 second bursts until a beacon is detected and logged
                 do{
                     if (!btScanner.isScanning()) {
                         startScan();
@@ -117,22 +115,33 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
+
                         stopScan();
-
                     }
-
                 }while(btDevicesArrayList.isEmpty());
+                //set start beacon to match the beacon found.
                 start =MainActivity.lookupIntByBeaconID(btDevicesArrayList.get(0).getName(), beacons);
+
+                //Calculate the current route. If Start is a bad value, use a dummy value
                 if(beacons.get(start) != null){
                     currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,start, dest, 5 );
                 }else{
                     currentRoute = PathGraph.findShortestPath(MainActivity.floorGraph,1, dest, 5 );
                 }
+                //Prep the calculated path by getting the current node isolated, and getting the next to calculate the
+                //path between them, then speak it aloud.
                 LocationLinkedObj currentNode = beacons.get(currentRoute.removeLast());
                 LocationLinkedObj speakNext = beacons.get(currentRoute.peekLast());
                 MainActivity.speak("Go " + currentNode.DirectionsTo.get(speakNext.getUniqueInt()));
-                while(!currentRoute.isEmpty()){
 
+                /**
+                 * This acts as the primary navigational loop. When inside the loop, the program will constantly check
+                 * to update what beacon is "closest" by RSSI.
+                 * When the new closest beacon matches that of the "next" beacon, the directions and route are updated.
+                 * When the route is complete, the loop exits.
+                 * */
+                while(!currentRoute.isEmpty()){
+                    //get the next route node and set the appropriate Image and Text to display them.
                     LocationLinkedObj nextNode = beacons.get(currentRoute.peekLast());
                     final String navUpdate = currentNode.DirectionsTo.get(nextNode.getUniqueInt());
                     final String parsedDirection = extractDirection(navUpdate);
@@ -151,24 +160,22 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
                         }
                     });
 
-
+                    //Start a 2 second low-latency scan to try finding the next beacon
                     if (!btScanner.isScanning()) {
                         startScan();
-
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         stopScan();
-
-
                     }
-
+                    //Check if any beacons are detected at all
                     if (btDevicesArrayList.size() > 0) {
-
+                        //If the closest beacon matches that of the "next" in the route, update the route to reflect
                         if (btDevicesArrayList.get(0).getName().equalsIgnoreCase(nextNode.BeaconID)) {
                             currentNode = beacons.get(currentRoute.removeLast());
+                            //if there's still more route to do, get the next and speak the next directions.
                             if(!currentRoute.isEmpty()){
                                 nextNode = beacons.get(currentRoute.peekLast());
                                 MainActivity.speak("Go " + currentNode.DirectionsTo.get(nextNode.getUniqueInt()));
@@ -178,22 +185,14 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
                         }
                     }
                 }
+                //Broke out of loop, user has arrived - alert them as such.
                 MainActivity.speak("You have arrived.");
-                //setContentView(R.layout.fragment_first);
-                //Button returnBTN = findViewById(R.id.return_btn);
-                /*returnBTN.setOnClickListener(new View.OnClickListener(){
-                    @Override
-                    public void onClick(View v) {
-                        if (myThread.isAlive()){
-                            myThread.interrupt();}
-                        finish();
-                    }
-                });*/
+                //Nav done, return to Main Menu
                 finish();
                 return;
             }
         };
-
+        //This created the Thread to run btScanRunnable and starts it.
         myThread = new Thread(btScanRunnable);
         myThread.start();
 
@@ -216,6 +215,10 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
         super.onDestroy();
     }
 
+
+    /**
+     * Displays an alert if Bluetooth functionality is disabled by OS (such as in settings)
+     * */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
@@ -237,22 +240,6 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
     @Override
     public void onClick(View v) {
 
-        if (v.getId() == R.id.Help_About_Button) {
-            Utility_Func.toast(getApplicationContext(), "Scan Button Pressed");
-
-            if (!btScanner.isScanning()) {
-                startScan();
-                Utility_Func.delay(5, new Utility_Func.DelayCallback() {
-                    @Override
-                    public void afterDelay() {
-                        stopScan();
-                    }
-                });
-
-            } else {
-                stopScan();
-            }
-        }
     }
 
 
@@ -271,7 +258,7 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
             btDevicesHashMap.put(address, btleDevice);
 
-            if(btleDevice.getName() != null){
+            if(btleDevice.getName() != null){ //only add BT beacons with names to filter non-nav BT
                 btDevicesArrayList.add(btleDevice);
             }
         }
@@ -291,11 +278,9 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
     /**
      * Clears the ArrayList and Hashmap the ListAdapter is keeping track of.
-     * Starts Scanner_BTLE.
-     * Changes the scan button text.
+     * Starts Scanner_BTLE
      */
     public void startScan(){
-        //btn_Scan.setText("Scanning...");
 
         btDevicesArrayList.clear();
         btDevicesHashMap.clear();
@@ -310,38 +295,14 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
      * Changes the scan button text.
      */
     public void stopScan() {
-        //btn_Scan.setText("Scan Again");
-
-        //get closest beacon
 
         btScanner.stop();
     }
-    public void recheckClosestBeacon(){
-        if(btDevicesArrayList.isEmpty()){
-            return;
-        }
-        BTLE_Device closest = btDevicesArrayList.get(0);
-        for (BTLE_Device btDev:btDevicesArrayList) {
-            if(btDev.getRSSI() < closest.getRSSI()){
-                closest = btDev;
-            }
-        }
-        if(closest.getName().equals(beacons.get(MainActivity.currentRoute.peek()).getBeaconID() )){
-            //change to next one
-            MainActivity.currentRoute.pop(); //this'll probably throw a null pointer if we get to the end of the route...
-        }
-    }
-    public int findClosestBeacon(){
-        BTLE_Device closest = btDevicesArrayList.get(0);
-        for (BTLE_Device btDev:btDevicesArrayList) {
-            if(btDev.getRSSI() < closest.getRSSI()){
-                closest = btDev;
-            }
-        }
-        int closestNode = MainActivity.lookupIntByBeaconID(closest.getName(), beacons);
-        return closestNode;
-    }
 
+    /**
+    * Quick function to extract first word from directional string
+     * This is used to determine the drawable path for the loaded image
+    * */
     private String extractDirection(String input){
         int i = input.indexOf(' ');
         return input.substring(0,i);

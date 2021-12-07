@@ -3,14 +3,17 @@ package com.example.helpmego_java;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-
+/**
+ * Class used to store information about Beacons detailed in the navigational graph, including Name, index assigned
+ * in the navigation graph, rooms associated with that beacon, and direction strings associated with connected nodes
+ * */
 public class LocationLinkedObj implements Serializable {
-    protected String BeaconID; //unique id for a ble beacon
+    protected String BeaconID; //unique id/name for a ble beacon
     public int UniqueInt; //identifies integer node to this beacon obj
     protected ArrayList<String> roomIDs; //room # considered "at" this beacon
     public HashMap<Integer, String> DirectionsTo; //details human directions to connected nodes
 
-    /*default/null constructor*/
+    /*empty constructor*/
     public LocationLinkedObj() {
     }
 
@@ -21,6 +24,7 @@ public class LocationLinkedObj implements Serializable {
         this.roomIDs = roomIDs;
         DirectionsTo = directionsTo;
     }
+    //constructor to create object and instantiate new Arrays/HashMaps to be filled later.
     public LocationLinkedObj(String beaconID, int uniqueInt){
         BeaconID = beaconID;
         UniqueInt = uniqueInt;

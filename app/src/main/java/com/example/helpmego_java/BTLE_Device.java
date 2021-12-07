@@ -1,7 +1,9 @@
 package com.example.helpmego_java;
 
 import android.bluetooth.BluetoothDevice;
-
+/**
+ * Class to store information from android's BluetoothDevice object alongside it's measured RSSI
+ * */
 public class BTLE_Device {
 
     private BluetoothDevice bluetoothDevice;

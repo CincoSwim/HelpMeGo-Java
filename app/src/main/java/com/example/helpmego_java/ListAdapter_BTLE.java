@@ -9,7 +9,9 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-
+/**
+ * Class used to store and display scanned BTLE information as part of the BLE List applet used in testing
+ * */
 public class ListAdapter_BTLE extends ArrayAdapter<BTLE_Device> {
 
     Activity activity;

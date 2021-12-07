@@ -8,7 +8,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
 import android.widget.Toast;
-
+/**
+ * Class of utility functions that can be called from anywhere in the project
+ * */
 public class Utility_Func {
 
     public interface DelayCallback{

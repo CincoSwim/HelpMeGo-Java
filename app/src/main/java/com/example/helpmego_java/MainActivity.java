@@ -24,13 +24,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import java.util.*;
-
+/**
+ * Activity Class that describes the logic and functionality of the Main Menu Screen.
+ * When first started, the app presents this screen to the user.
+ * From this screen, the user can detail what room they'd like to navigate to, at which point the app will transition
+ * to the BluetoothDeviceList activity.
+ * */
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
-    private static final String TAG = "MyApp";
+    private static final String TAG = "MyApp"; //debug tag
     public static final Integer RecordAudioRequestCode = 1;
     private final int REQ_CODE_SPEECH_INPUT = 100;
-    protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>();
-    protected static ArrayList<LocationLinkedObj> beacons = new ArrayList<LocationLinkedObj>(); //there's gotta be a cleaner way for this
+    protected static ArrayList<ArrayList<Integer>> floorGraph = new ArrayList<ArrayList<Integer>>(); //initialize Graph
+    protected static ArrayList<LocationLinkedObj> beacons = new ArrayList<LocationLinkedObj>(); //initialize Node list
     protected static LinkedList<Integer> currentRoute;
     private Spinner spinner;
     List<String> rooms;
@@ -47,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
-        //fill spinner
+        //Fill spinner object with possible room numbers and detail Listener method
         spinner = (Spinner) findViewById(R.id.spinner);
         rooms = new ArrayList<String>();
         rooms.add("Pick a room number!");
@@ -63,113 +68,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinner.setOnItemSelectedListener(this);
 
 
-        //Load in static maps?
+        //Initialize and fill in static maps and graph data
         for (int i=0; i<=5; i++){
             floorGraph.add(i, new ArrayList<Integer>());
         }
         makeTestGraph();
 
-
+        //check for Audio Recording permissions
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
             checkPermission();
         }
-
-
-        /* remove to go back to prior speech method
-        speechRecog = SpeechRecognizer.createSpeechRecognizer(this);
-        final Intent speechRecognizerIntent = new Intent (RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        speechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
-
-        speechRecog.setRecognitionListener(new RecognitionListener() {
-            @Override
-            public void onReadyForSpeech(Bundle params) {
-
-            }
-
-            @Override
-            public void onBeginningOfSpeech() {
-                Log.d(TAG, "Listening to input on button press");
-                editText.setText("");
-                editText.setHint("Listening...");
-
-                Log.d(TAG, "Listening to input on button press");
-
-            }
-
-            @Override
-            public void onRmsChanged(float rmsdB) {
-
-            }
-
-            @Override
-            public void onBufferReceived(byte[] buffer) {
-
-            }
-
-            @Override
-            public void onEndOfSpeech() {
-
-            }
-
-            @Override
-            public void onError(int error) {
-
-            }
-
-            @Override
-            public void onResults(Bundle results) {
-                    Log.d(TAG, "STT onResults() starting...");
-                    String ttsTester = "";
-                    ArrayList<String> data = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                    editText.setText(data.get(0));
-                    String testStr = data.get(0);
-                    int lastindex = testStr.lastIndexOf("room");
-                    if(lastindex == -1){
-                        testStr = "heard nothing!";
-                    }else{
-                        ttsTester = testStr.substring(lastindex);
-                        testStr += "(parsed room num: " + ttsTester + ")";
-                    }
-                    //int roomindex = testStr.indexOf("room") + 5;
-
-                    tts.speak("You want to go to " + ttsTester + ", right?", TextToSpeech.QUEUE_ADD, null, null);
-
-                    Log.d(TAG, "onResults: string manip finished");
-                    editText.setText(testStr);
-
-                    // Begin finding path
-                    Log.d(TAG, "onResults: finding path...");
-                    //get closest BT Beacon identity
-
-
-                    //get appropriate destination beacon identity
-                    dest = lookupIntByRoomNum(ttsTester, beacons);
-                    if(dest < 0) dest = 0;
-
-                    //Find path between the two - findShortestPath()
-                    //^ this is now done in the new activity!
-
-                    Log.d(TAG, "onResults: dest parsed, moving to BluetoothDeviceList activity");
-                    //end finding path, move to nav
-                    Log.d(TAG, "making murderous intent");
-                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
-
-                    intent.putExtra("dest", dest);
-                    Log.d(TAG, "intent filled, moving to activity");
-                    startActivity(intent);
-
-
-            }
-
-
-        });
-        */
-
-
+        //Define button in the center of the screen and set it's OnClickListener action
         Button mainButton = findViewById(R.id.button_first);
         mainButton.setOnClickListener(new View.OnClickListener(){
-
             @Override
             public void onClick(View v) {
                 String parsedRoom;
@@ -178,8 +89,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             }
         });
 
-
-        // Added button to goto bluetooth device screen for testing
+        // Added button to goto bluetooth device screen for debug tessting - stub
         Button toBTDevices = (Button) findViewById(R.id.BTButton);
         toBTDevices.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
@@ -199,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onStart(){
         super.onStart();
+        //initialize TextToSpeech object tts to use phone language and US locale
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -207,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED){
                         Log.e("TTS ERROR", "Lang not Supported");
 
-
                     }else{
+                        //TTS success, test it by speaking the intro string
                         tts.speak("Welcome to Help Me Go. To start, press the button in the center of the screen, and speak where you'd like to go.", TextToSpeech.QUEUE_FLUSH, null, null);
                     }
                 }
@@ -219,11 +130,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onResume(){
         super.onResume();
-        //speak("Main Menu");
 
     }
 
     private void checkPermission(){
+        //prompt to allow Audio Recording
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO},RecordAudioRequestCode);
         }
@@ -238,9 +149,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar item clicks here.
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
@@ -252,13 +161,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
 
-
+    /**
+     * Method to call tts.speak() with proper parameters
+     * */
     public static void speak(String text){
 
         Log.d(TAG, "TTS Speak() called - Speaking: " + text );
         tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
     }
-
+    /**
+     * Function to fill floorGraph and beacons with static map data.
+     * In a future release candidate, this can be replaced with something like a JSON parser or similar
+     * */
     private void makeTestGraph(){
         Log.d(TAG, "filling adj graph");
 
@@ -266,7 +180,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         PathGraph.addEdge(floorGraph, 1, 2);
         PathGraph.addEdge(floorGraph, 2, 3);
         PathGraph.addEdge(floorGraph, 3, 4);
-        //PathGraph.addEdge(floorGraph, 4, 1);
         Log.d(TAG, "graph filled");
         Log.d(TAG, "filling LocationLinkedObjs");
 
@@ -299,6 +212,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
        // beacons.get(4).addDirection(1, "left");
         Log.d(TAG, "list of LocationLinkedObjs (beacons) filled");
     };
+
+    //Takes in a beacon's name and returns its index if contained in the beacon list
     public static int lookupIntByBeaconID(String BUID, ArrayList<LocationLinkedObj> bList){
         //for each object in bList
         Log.d(TAG, "lookup by BeaconID Started");
@@ -312,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Log.d(TAG, "No ID found, defaulting");
         return 99;
     }
+    //Takes in a room number and returns the index of the beacon assigned to that room if it exists
     private int lookupIntByRoomNum(String Room, ArrayList<LocationLinkedObj> bList){
         for (LocationLinkedObj beac: bList) {
             if(beac.roomIDs.contains(Room)){
@@ -324,32 +240,37 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         return 99;
     }
 
+    /**
+     * Details actions taken when an option is selected in the spinner, then transitions to BluetoothDeviceList
+     * activity if a user selected a room.
+     * */
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         String item = parent.getItemAtPosition(position).toString();
-        if(item.equals("Pick a room number!")) return;
-        dest = lookupIntByRoomNum(item, beacons);
-        if(dest < 0) dest = 0;
+        if(item.equals("Pick a room number!")) return; //Don't want to transition because of the dummy val
 
-        //Find path between the two - findShortestPath()
-        //^ this is now done in the new activity!
+        //lookup by room num
+        dest = lookupIntByRoomNum(item, beacons);
+        if(dest < 0) dest = 0; //catch bad values
 
         Log.d(TAG, "onResults: dest parsed, moving to BluetoothDeviceList activity");
         /*end finding path, move to nav*/
-        Log.d(TAG, "making murderous intent");
+        Log.d(TAG, "making malicious intent"); //just a joke
         Intent intent = new Intent(MainActivity.this, BluetoothDeviceList.class);
-
+        //store relevant data for retrieval
         intent.putExtra("dest", dest);
         intent.putExtra("room", item);
         Log.d(TAG, "intent filled, moving to activity");
-        startActivity(intent);
+        startActivity(intent); //Start BluetoothDeviceList.Class activity
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
         //TODO Auto generated stub
     }
-
+    /**
+     * Creates the Text-to-Speech popup, prompting user for Speech Recog input.
+     * */
     private void promptSpeechInput(){
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
@@ -361,6 +282,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         return;
     }
+
+    /**
+     * Runs after successful completion of the Speech Recog popup.
+     * If a room number is parsed, transitions activity to the navigation view.
+     * */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
@@ -370,14 +296,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             case REQ_CODE_SPEECH_INPUT: {
                 if (resultCode == RESULT_OK && null != data){
                     ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    //can get string from result.get(0);
+                    //get STT string
                     STT_STRING = result.get(0);
-                    int lastindex = STT_STRING.lastIndexOf("room");
+                    int lastindex = STT_STRING.lastIndexOf("room"); //parse index of 'room'
                     if(lastindex == -1){
                         parsedRoom = "heard nothing!";
                         Log.e(TAG, "no room parsed - check voice input");
                         Toast.makeText(getApplicationContext(), "nothing heard", Toast.LENGTH_SHORT).show();
                     }else {
+                        //isolate room number, find corresponding beacon, and go to BluetoothDeviceList class
                         parsedRoom = STT_STRING.substring(lastindex + 5);
                         dest = lookupIntByRoomNum(parsedRoom, beacons);
                         if (dest == 99) return;
