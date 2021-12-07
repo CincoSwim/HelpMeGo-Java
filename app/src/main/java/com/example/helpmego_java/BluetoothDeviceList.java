@@ -169,23 +169,27 @@ public class BluetoothDeviceList extends AppCompatActivity implements View.OnCli
 
                         if (btDevicesArrayList.get(0).getName().equalsIgnoreCase(nextNode.BeaconID)) {
                             currentNode = beacons.get(currentRoute.removeLast());
-                            nextNode = beacons.get(currentRoute.peekLast());
-                            MainActivity.speak("Go " + currentNode.DirectionsTo.get(nextNode.getUniqueInt()));
+                            if(!currentRoute.isEmpty()){
+                                nextNode = beacons.get(currentRoute.peekLast());
+                                MainActivity.speak("Go " + currentNode.DirectionsTo.get(nextNode.getUniqueInt()));
+                            }
+
 
                         }
                     }
                 }
                 MainActivity.speak("You have arrived.");
-                setContentView(R.layout.fragment_first);
-                Button returnBTN = findViewById(R.id.return_btn);
-                returnBTN.setOnClickListener(new View.OnClickListener(){
+                //setContentView(R.layout.fragment_first);
+                //Button returnBTN = findViewById(R.id.return_btn);
+                /*returnBTN.setOnClickListener(new View.OnClickListener(){
                     @Override
                     public void onClick(View v) {
                         if (myThread.isAlive()){
                             myThread.interrupt();}
                         finish();
                     }
-                });
+                });*/
+                finish();
                 return;
             }
         };
